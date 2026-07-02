@@ -1,0 +1,13 @@
+.agents/
+.codex/
+.git/
+.vercel/
+node_modules/
+.data/
+assets/uploads/
+
+kingshadp-desktop-full.png
+kingshadp-desktop-viewport.png
+kingshadp-desktop.png
+kingshadp-mobile-full.png
+kingshadp-mobile-viewport.png

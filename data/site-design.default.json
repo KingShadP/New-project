@@ -1,0 +1,273 @@
+{
+  "version": 1,
+  "updatedAt": "2026-07-01T00:00:00.000Z",
+  "site": {
+    "title": "KingShadP - Official Landing World",
+    "description": "A signed-entry world for KingShadP pieces, sound, visual archive, and Giragon mythology.",
+    "canonical": "https://kingshadp.com/"
+  },
+  "theme": {
+    "paper": "#f7f4ef",
+    "paperStrong": "#fffdfa",
+    "ink": "#090806",
+    "leather": "#15120f",
+    "charcoal": "#26221e",
+    "muted": "#6c645b",
+    "line": "#d8d1c8",
+    "softLine": "#ebe5de",
+    "champagne": "#d6c4aa",
+    "rose": "#a97158",
+    "platinum": "#d8dcdd",
+    "reverse": "#fffdfa"
+  },
+  "typography": {
+    "displayFamily": "Georgia, \"Times New Roman\", serif",
+    "bodyFamily": "\"Helvetica Neue\", Arial, sans-serif",
+    "heroSize": 78,
+    "sectionTitleSize": 62,
+    "panelTitleSize": 54,
+    "bodySize": 18,
+    "navSize": 14
+  },
+  "motion": {
+    "bootloader": true,
+    "cursor": true,
+    "pageTransitions": true,
+    "parallax": true,
+    "reveals": true,
+    "spatialClicks": true,
+    "musicVisualizer": true,
+    "intensity": 1,
+    "ambientVideo": ""
+  },
+  "hero": {
+    "signature": "KingShadP",
+    "title": "A signed-entry world for pieces, sound, and myth.",
+    "body": "Luxury commerce, Giragon artifacts, music identity, and visual archive shaped into one polished storefront system.",
+    "primaryLabel": "Enter Shop",
+    "primaryHref": "#shop",
+    "secondaryLabel": "Open Music Room",
+    "secondaryHref": "#music",
+    "image": "assets/derived/giragon-hoodie-detail.png",
+    "imageAlt": "KingShadP black hoodie, rose gold Giragon relic, and leather accessory on a platinum display shelf",
+    "imagePosition": "55% 50%",
+    "issue": "Giragon Issue 01",
+    "caption": "Matte black, rose gold, archive light.",
+    "artifactGlyph": "G",
+    "artifactLabel": "Giragon"
+  },
+  "routes": [
+    {
+      "index": "01",
+      "title": "Luxury Product Room",
+      "body": "Shop the core silhouettes.",
+      "href": "#shop"
+    },
+    {
+      "index": "02",
+      "title": "Curated Chapters",
+      "body": "Giragon and KSP mythology.",
+      "href": "#collection"
+    },
+    {
+      "index": "03",
+      "title": "Private Listening Room",
+      "body": "Sound, notes, and releases.",
+      "href": "#music"
+    }
+  ],
+  "sections": {
+    "shopIndex": "Shop",
+    "shopTitle": "Product room, not product dump.",
+    "shopBody": "Large spacing, clear pricing, collection context, and fast purchase paths for the Giragon and KSP wardrobe.",
+    "collectionIndex": "Collection",
+    "collectionTitle": "Chapters with their own temperature.",
+    "collectionBody": "Giragon carries the relic energy. KSP carries the signature identity. Both stay mature, edited, and commercial.",
+    "pdpIndex": "Product Detail",
+    "musicIndex": "Music",
+    "aboutIndex": "About",
+    "journalIndex": "Blog"
+  },
+  "chapters": [
+    {
+      "key": "giragon",
+      "label": "Giragon",
+      "title": "Relic pieces guarded by light.",
+      "body": "Rose-gold metal, black fabric, and museum case restraint. The symbol appears like an artifact, not decoration.",
+      "image": "assets/visual-samples/sample-01-luxury-drop-vault.png",
+      "imageAlt": "Giragon crown artifact inside a glass vault",
+      "revealLabel": "Chapter room",
+      "productIds": ["giragon-crown-hoodie", "museum-shell-jacket"]
+    },
+    {
+      "key": "ksp",
+      "label": "KSP",
+      "title": "Signature language, quiet power.",
+      "body": "Matte off-white space, black accents, platinum surfaces, and personal markings held with editorial control.",
+      "image": "assets/visual-samples/sample-03-private-archive-grid.png",
+      "imageAlt": "Private KingShadP visual archive grid",
+      "revealLabel": "Archive grid",
+      "productIds": ["ksp-signature-tee", "platinum-long-sleeve"]
+    }
+  ],
+  "products": [
+    {
+      "id": "giragon-crown-hoodie",
+      "title": "Giragon Crown Hoodie",
+      "collection": "Giragon",
+      "type": "Hoodie",
+      "category": "hoodies",
+      "price": 188,
+      "image": "assets/derived/giragon-hoodie-detail.png",
+      "imageAlt": "Giragon Crown Hoodie in matte black",
+      "position": "52% 48%",
+      "story": "Heavy matte black fleece with a controlled Giragon mark and rose-gold accessory language.",
+      "material": "Heavy fleece, satin neck label, rose-gold stitch detail",
+      "cropClass": "crop-hoodie"
+    },
+    {
+      "id": "ksp-signature-tee",
+      "title": "KSP Signature Tee",
+      "collection": "KSP",
+      "type": "T-shirt",
+      "category": "t-shirts",
+      "price": 88,
+      "image": "assets/visual-samples/sample-01-luxury-drop-vault.png",
+      "imageAlt": "KSP Signature Tee presented in a private drop vault",
+      "position": "72% 58%",
+      "story": "A clean signature tee built for the first layer of the KingShadP uniform.",
+      "material": "Midweight cotton, soft wash, signature chest mark",
+      "cropClass": "crop-vault"
+    },
+    {
+      "id": "platinum-long-sleeve",
+      "title": "Platinum Long Sleeve",
+      "collection": "KSP",
+      "type": "Long sleeve",
+      "category": "long-sleeves",
+      "price": 128,
+      "image": "assets/visual-samples/sample-03-private-archive-grid.png",
+      "imageAlt": "Platinum Long Sleeve archive study",
+      "position": "54% 40%",
+      "story": "A long sleeve shaped around platinum gallery space and the private archive grid.",
+      "material": "Cotton jersey, rib cuff, archival screen print",
+      "cropClass": "crop-archive"
+    },
+    {
+      "id": "black-issue-shorts",
+      "title": "Black Issue Shorts",
+      "collection": "KSP",
+      "type": "Shorts",
+      "category": "shorts",
+      "price": 96,
+      "image": "assets/visual-samples/sample-03-private-archive-grid.png",
+      "imageAlt": "Black Issue Shorts textile detail",
+      "position": "88% 42%",
+      "story": "Black fabric, quiet branding, and a direct summer cut for the KSP chapter.",
+      "material": "Heavy cotton twill, drawcord waist, tonal mark",
+      "cropClass": "crop-leather"
+    },
+    {
+      "id": "museum-shell-jacket",
+      "title": "Museum Shell Jacket",
+      "collection": "Giragon",
+      "type": "Jacket",
+      "category": "jackets",
+      "price": 268,
+      "image": "assets/photos/hero-architecture.png",
+      "imageAlt": "Museum Shell Jacket editorial architectural study",
+      "position": "62% 48%",
+      "story": "A structured shell jacket made for the museum corridor side of the KingShadP world.",
+      "material": "Water-resistant shell, mesh lining, interior relic label",
+      "cropClass": "crop-architecture"
+    },
+    {
+      "id": "rose-vault-hoodie",
+      "title": "Rose Vault Hoodie",
+      "collection": "Giragon",
+      "type": "Hoodie",
+      "category": "hoodies",
+      "price": 198,
+      "image": "assets/visual-samples/sample-01-luxury-drop-vault.png",
+      "imageAlt": "Rose Vault Hoodie with Giragon relic detail",
+      "position": "82% 74%",
+      "story": "A vault-weight hoodie with rose-gold detail and restrained Giragon placement.",
+      "material": "Heavy fleece, brushed interior, rose-gold embroidery",
+      "cropClass": "crop-relic"
+    }
+  ],
+  "music": {
+    "title": "Private listening room.",
+    "body": "Cover art, playback space, release notes, and streaming exits sit inside the same KingShadP world.",
+    "cover": "assets/photos/work-quiet-motion.png",
+    "coverAlt": "KingShadP private listening room cover art",
+    "trackTitle": "Rare Signal",
+    "trackSubtitle": "KingShadP - Archive Session",
+    "links": [
+      { "label": "Apple Music", "href": "#music" },
+      { "label": "Spotify", "href": "#music" },
+      { "label": "SoundCloud", "href": "#music" }
+    ]
+  },
+  "about": {
+    "title": "Personal mythology, not a generic bio.",
+    "body": "KingShadP moves through clothing, music, motion, symbols, and visual artifacts. The signature is the entry. Giragon is the guardian language. The site is the museum and the store.",
+    "image": "assets/photos/process-doorway.png",
+    "imageAlt": "Cinematic concrete corridor used as KingShadP visual artifact",
+    "caption": "Origin / light / discipline"
+  },
+  "journal": {
+    "title": "Journal and archive notes.",
+    "body": "Drop notes, music notes, visual essays, behind-the-scenes records, and collection stories.",
+    "entries": [
+      {
+        "label": "Drop Notes",
+        "title": "How the Giragon chapter enters the vault",
+        "href": "#journal",
+        "image": "assets/visual-samples/sample-03-private-archive-grid.png",
+        "imageAlt": "Private visual archive grid"
+      },
+      {
+        "label": "Visual Essay",
+        "title": "Why light has to move like a signature",
+        "href": "#journal",
+        "image": "assets/photos/work-concrete-light.png",
+        "imageAlt": "Editorial concrete light study"
+      },
+      {
+        "label": "Music Notes",
+        "title": "Rare Signal and the private room tempo",
+        "href": "#journal",
+        "image": "assets/photos/work-quiet-motion.png",
+        "imageAlt": "Motion study for music identity"
+      }
+    ]
+  },
+  "mediaLibrary": [
+    {
+      "label": "Giragon Statue Mark",
+      "url": "assets/brand/giragon-statue-mark.png",
+      "kind": "image"
+    },
+    {
+      "label": "KSP Shield Mark",
+      "url": "assets/brand/ksp-shield-mark.png",
+      "kind": "image"
+    },
+    {
+      "label": "Crown Stage Mark",
+      "url": "assets/brand/crown-stage-mark.png",
+      "kind": "image"
+    },
+    {
+      "label": "Giragon Hoodie Detail",
+      "url": "assets/derived/giragon-hoodie-detail.png",
+      "kind": "image"
+    },
+    {
+      "label": "Private Archive Grid",
+      "url": "assets/visual-samples/sample-03-private-archive-grid.png",
+      "kind": "image"
+    }
+  ]
+}
