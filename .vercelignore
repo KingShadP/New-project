@@ -4,6 +4,7 @@
 .vercel/
 node_modules/
 .data/
+.env*
 assets/uploads/
 
 kingshadp-desktop-full.png
