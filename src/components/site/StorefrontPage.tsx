@@ -1,10 +1,10 @@
 import { readDesign } from "@/lib/content/service";
-import { siteDesignSchema } from "@/lib/content/schema";
 import { StorefrontClient } from "@/components/site/StorefrontClient";
 
 export async function StorefrontPage() {
   const data = await readDesign();
-  const parsed = siteDesignSchema.parse(data);
+  const design = { ...data } as typeof data & { storage?: unknown };
+  delete design.storage;
 
-  return <StorefrontClient design={parsed} />;
+  return <StorefrontClient design={design} />;
 }
