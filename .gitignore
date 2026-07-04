@@ -2,8 +2,11 @@
 .codex/
 .vercel/
 node_modules/
+.next/
+out/
 .data/
 assets/uploads/
+public/assets/uploads/
 
 kingshadp-desktop-full.png
 kingshadp-desktop-viewport.png
@@ -13,3 +16,5 @@ kingshadp-mobile-viewport.png
 
 .vercel
 .env*
+
+*.tsbuildinfo
