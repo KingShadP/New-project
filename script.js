@@ -647,12 +647,20 @@ function setupReveal() {
 }
 
 function setupHeader() {
+  let headerFrame = null;
   const updateHeader = () => {
     header.classList.toggle("is-scrolled", window.scrollY > 20);
+    headerFrame = null;
+  };
+
+  const requestHeaderUpdate = () => {
+    if (!headerFrame) {
+      headerFrame = requestAnimationFrame(updateHeader);
+    }
   };
 
   updateHeader();
-  window.addEventListener("scroll", updateHeader, { passive: true });
+  window.addEventListener("scroll", requestHeaderUpdate, { passive: true });
 }
 
 function setupNavState() {
@@ -660,10 +668,22 @@ function setupNavState() {
     .map((link) => document.querySelector(link.getAttribute("href")))
     .filter(Boolean);
 
+  let navFrame = null;
+  let sectionOffsets = [];
+
+  const cacheOffsets = () => {
+    sectionOffsets = sections.map((section) => ({
+      section,
+      offset: section.offsetTop - 130,
+    }));
+  };
+
   const updateNav = () => {
     let active = sections[0];
-    sections.forEach((section) => {
-      if (section.offsetTop - 130 <= window.scrollY) {
+    const scrollY = window.scrollY;
+
+    sectionOffsets.forEach(({ section, offset }) => {
+      if (offset <= scrollY) {
         active = section;
       }
     });
@@ -680,10 +700,22 @@ function setupNavState() {
       nav.style.setProperty("--nav-x", `${linkRect.left - navRect.left}px`);
       nav.style.setProperty("--nav-w", `${linkRect.width}px`);
     }
+    navFrame = null;
   };
 
+  const requestNavUpdate = () => {
+    if (!navFrame) {
+      navFrame = requestAnimationFrame(updateNav);
+    }
+  };
+
+  cacheOffsets();
   updateNav();
-  window.addEventListener("scroll", updateNav, { passive: true });
+  window.addEventListener("scroll", requestNavUpdate, { passive: true });
+  window.addEventListener("resize", () => {
+    cacheOffsets();
+    requestNavUpdate();
+  });
 }
 
 function setupParallax() {
