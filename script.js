@@ -647,12 +647,22 @@ function setupReveal() {
 }
 
 function setupHeader() {
+  let headerScrollFrame = null;
+
   const updateHeader = () => {
+    // Optimization: prevent layout thrashing on scroll
     header.classList.toggle("is-scrolled", window.scrollY > 20);
+    headerScrollFrame = null;
+  };
+
+  const requestHeaderUpdate = () => {
+    if (!headerScrollFrame) {
+      headerScrollFrame = requestAnimationFrame(updateHeader);
+    }
   };
 
   updateHeader();
-  window.addEventListener("scroll", updateHeader, { passive: true });
+  window.addEventListener("scroll", requestHeaderUpdate, { passive: true });
 }
 
 function setupNavState() {
@@ -660,10 +670,15 @@ function setupNavState() {
     .map((link) => document.querySelector(link.getAttribute("href")))
     .filter(Boolean);
 
+  let navScrollFrame = null;
+
   const updateNav = () => {
+    // Optimization: Cache scrollY to reduce DOM reads and prevent layout thrashing
+    const scrollY = window.scrollY;
     let active = sections[0];
+
     sections.forEach((section) => {
-      if (section.offsetTop - 130 <= window.scrollY) {
+      if (section.offsetTop - 130 <= scrollY) {
         active = section;
       }
     });
@@ -680,10 +695,18 @@ function setupNavState() {
       nav.style.setProperty("--nav-x", `${linkRect.left - navRect.left}px`);
       nav.style.setProperty("--nav-w", `${linkRect.width}px`);
     }
+
+    navScrollFrame = null;
+  };
+
+  const requestNavUpdate = () => {
+    if (!navScrollFrame) {
+      navScrollFrame = requestAnimationFrame(updateNav);
+    }
   };
 
   updateNav();
-  window.addEventListener("scroll", updateNav, { passive: true });
+  window.addEventListener("scroll", requestNavUpdate, { passive: true });
 }
 
 function setupParallax() {
