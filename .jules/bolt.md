@@ -1,0 +1,3 @@
+## 2024-03-08 - Synchronous Scroll Handlers Block Main Thread
+**Learning:** Found that `setupHeader` and `setupNavState` were binding directly to the `scroll` event. `setupNavState` was performing heavy DOM measurements (`offsetTop`, `getBoundingClientRect`) and DOM writes (`classList.toggle`, `style.setProperty`) synchronously on every scroll pixel, causing layout thrashing and blocking the main thread.
+**Action:** Use `requestAnimationFrame` to debounce high-frequency events like `scroll` or `resize`. This batches DOM reads and writes, keeping execution synchronized with the display refresh rate (e.g. 60fps) and preventing layout thrashing.
