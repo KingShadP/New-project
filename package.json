@@ -4,7 +4,6 @@
   "private": true,
   "type": "commonjs",
   "scripts": {
-    "build": "echo 'No build step required'",
     "check": "node --check script.js && node --check admin.js && node --check api/admin-login.js && node --check api/session.js && node --check api/design.js && node --check api/upload.js && node --check api/_lib/auth.js && node --check api/_lib/body.js && node --check api/_lib/storage.js"
   },
   "dependencies": {
