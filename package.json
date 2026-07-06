@@ -4,10 +4,10 @@
   "private": true,
   "type": "commonjs",
   "scripts": {
-    "check": "node --check script.js && node --check admin.js && node --check api/admin-login.js && node --check api/session.js && node --check api/design.js && node --check api/upload.js && node --check api/_lib/auth.js && node --check api/_lib/body.js && node --check api/_lib/storage.js"
+    "check": "node --check script.js && node --check admin.js && node --check api/admin-login.js && node --check api/session.js && node --check api/design.js && node --check api/upload.js && node --check api/_lib/auth.js && node --check api/_lib/body.js && node --check api/_lib/storage.js",
+    "build": "echo 'No build step required'"
   },
   "dependencies": {
     "@vercel/blob": "^2.0.0"
-  },
-  "devDependencies": {}
+  }
 }
