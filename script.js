@@ -143,6 +143,7 @@ let ringX = pointerX;
 let ringY = pointerY;
 let cursorFrame;
 let scrollFrame;
+let navScrollFrame; // ⚡ Bolt: Store requestAnimationFrame ID for throttling nav state
 let activeProductId = "giragon-crown-hoodie";
 let selectedSize = "M";
 let cart = [];
@@ -660,6 +661,8 @@ function setupNavState() {
     .map((link) => document.querySelector(link.getAttribute("href")))
     .filter(Boolean);
 
+  let lastActiveId = null;
+
   const updateNav = () => {
     let active = sections[0];
     sections.forEach((section) => {
@@ -668,8 +671,18 @@ function setupNavState() {
       }
     });
 
+    const activeId = active ? active.id : null;
+
+    // ⚡ Bolt: Early return to prevent unnecessary DOM writes/reads if active section hasn't changed
+    if (activeId === lastActiveId) {
+      navScrollFrame = null;
+      return;
+    }
+
+    lastActiveId = activeId;
+
     navLinks.forEach((link) => {
-      link.classList.toggle("is-active", active && link.getAttribute("href") === `#${active.id}`);
+      link.classList.toggle("is-active", active && link.getAttribute("href") === `#${activeId}`);
     });
 
     const activeLink = [...navLinks].find((link) => link.classList.contains("is-active")) || navLinks[0];
@@ -680,10 +693,18 @@ function setupNavState() {
       nav.style.setProperty("--nav-x", `${linkRect.left - navRect.left}px`);
       nav.style.setProperty("--nav-w", `${linkRect.width}px`);
     }
+
+    navScrollFrame = null;
+  };
+
+  const requestNavUpdate = () => {
+    if (!navScrollFrame) {
+      navScrollFrame = requestAnimationFrame(updateNav);
+    }
   };
 
   updateNav();
-  window.addEventListener("scroll", updateNav, { passive: true });
+  window.addEventListener("scroll", requestNavUpdate, { passive: true });
 }
 
 function setupParallax() {

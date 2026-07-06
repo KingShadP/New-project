@@ -1,0 +1,3 @@
+## 2025-02-13 - Preventing Layout Thrashing in Scroll Handlers
+**Learning:** Attaching heavy layout calculations and DOM writes directly to scroll handlers (or poorly throttled ones) causes severe layout thrashing. The `setupNavState` function was previously forcing layout calculations on every scroll frame by reading bounds (`getBoundingClientRect`) and writing styles, causing unnecessary reflows.
+**Action:** Always debounce/throttle scroll events with `requestAnimationFrame`, and use an early return to ensure DOM writes are ONLY executed when the actual target state has changed (e.g. tracking `lastActiveId`).
