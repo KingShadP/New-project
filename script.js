@@ -143,6 +143,8 @@ let ringX = pointerX;
 let ringY = pointerY;
 let cursorFrame;
 let scrollFrame;
+let headerFrame;
+let navFrame;
 let activeProductId = "giragon-crown-hoodie";
 let selectedSize = "M";
 let cart = [];
@@ -649,10 +651,17 @@ function setupReveal() {
 function setupHeader() {
   const updateHeader = () => {
     header.classList.toggle("is-scrolled", window.scrollY > 20);
+    headerFrame = null;
+  };
+
+  const requestHeaderUpdate = () => {
+    if (!headerFrame) {
+      headerFrame = requestAnimationFrame(updateHeader);
+    }
   };
 
   updateHeader();
-  window.addEventListener("scroll", updateHeader, { passive: true });
+  window.addEventListener("scroll", requestHeaderUpdate, { passive: true });
 }
 
 function setupNavState() {
@@ -661,29 +670,45 @@ function setupNavState() {
     .filter(Boolean);
 
   const updateNav = () => {
+    // Read phase
+    const scrollY = window.scrollY;
     let active = sections[0];
     sections.forEach((section) => {
-      if (section.offsetTop - 130 <= window.scrollY) {
+      if (section.offsetTop - 130 <= scrollY) {
         active = section;
       }
     });
 
+    let navRect = null;
+    let linkRect = null;
+    const activeLink = [...navLinks].find((link) => active && link.getAttribute("href") === `#${active.id}`) || navLinks[0];
+
+    if (nav && activeLink) {
+       navRect = nav.getBoundingClientRect();
+       linkRect = activeLink.getBoundingClientRect();
+    }
+
+    // Write phase
     navLinks.forEach((link) => {
       link.classList.toggle("is-active", active && link.getAttribute("href") === `#${active.id}`);
     });
 
-    const activeLink = [...navLinks].find((link) => link.classList.contains("is-active")) || navLinks[0];
-
-    if (nav && activeLink) {
-      const navRect = nav.getBoundingClientRect();
-      const linkRect = activeLink.getBoundingClientRect();
+    if (navRect && linkRect) {
       nav.style.setProperty("--nav-x", `${linkRect.left - navRect.left}px`);
       nav.style.setProperty("--nav-w", `${linkRect.width}px`);
+    }
+
+    navFrame = null;
+  };
+
+  const requestNavUpdate = () => {
+    if (!navFrame) {
+      navFrame = requestAnimationFrame(updateNav);
     }
   };
 
   updateNav();
-  window.addEventListener("scroll", updateNav, { passive: true });
+  window.addEventListener("scroll", requestNavUpdate, { passive: true });
 }
 
 function setupParallax() {
@@ -692,14 +717,20 @@ function setupParallax() {
   }
 
   const updateParallax = () => {
+    // Read phase
     const viewportHeight = window.innerHeight;
     const intensity = Number(motionConfig.intensity ?? 1);
 
-    parallaxTargets.forEach((target) => {
+    const layoutData = Array.from(parallaxTargets).map((target) => {
       const rect = target.getBoundingClientRect();
       const progressValue = (rect.top + rect.height / 2 - viewportHeight / 2) / viewportHeight;
       const depth = Number(target.dataset.depth || 18) * intensity;
       const offset = Math.max(-Math.abs(depth), Math.min(Math.abs(depth), progressValue * -depth));
+      return { target, offset };
+    });
+
+    // Write phase
+    layoutData.forEach(({ target, offset }) => {
       target.style.setProperty("--parallax-y", `${offset}px`);
     });
 
