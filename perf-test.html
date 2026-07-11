@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Parallax Perf Test</title>
+    <style>
+        .parallax-item {
+            height: 200px;
+            width: 100%;
+            margin-bottom: 200px;
+            background: #eee;
+        }
+        body {
+            height: 5000px; /* Force scrolling */
+        }
+    </style>
+</head>
+<body>
+    <div id="container"></div>
+    <script>
+        const container = document.getElementById('container');
+        for (let i = 0; i < 50; i++) {
+            const div = document.createElement('div');
+            div.className = 'parallax-item';
+            div.dataset.depth = Math.random() * 20;
+            container.appendChild(div);
+        }
+
+        const parallaxTargets = document.querySelectorAll('.parallax-item');
+        let viewportHeight = window.innerHeight;
+        let intensity = 1;
+
+        function originalUpdate() {
+            parallaxTargets.forEach((target) => {
+                const rect = target.getBoundingClientRect();
+                const progressValue = (rect.top + rect.height / 2 - viewportHeight / 2) / viewportHeight;
+                const depth = Number(target.dataset.depth || 18) * intensity;
+                const offset = Math.max(-Math.abs(depth), Math.min(Math.abs(depth), progressValue * -depth));
+                target.style.setProperty("--parallax-y", offset + "px");
+            });
+        }
+
+        // Optimized state
+        let parallaxData = Array.from(parallaxTargets).map(target => ({
+            target,
+            depth: Number(target.dataset.depth || 18) * intensity,
+            rectTop: target.getBoundingClientRect().top + window.scrollY,
+            rectHeight: target.getBoundingClientRect().height,
+        }));
+
+        function handleResize() {
+            viewportHeight = window.innerHeight;
+            parallaxData = Array.from(parallaxTargets).map(target => ({
+                target,
+                depth: Number(target.dataset.depth || 18) * intensity,
+                rectTop: target.getBoundingClientRect().top + window.scrollY,
+                rectHeight: target.getBoundingClientRect().height,
+            }));
+        }
+
+        function optimizedUpdate() {
+            const scrollY = window.scrollY;
+            parallaxData.forEach((data) => {
+                // calculate current top based on cached top and current scroll
+                const currentTop = data.rectTop - scrollY;
+                const progressValue = (currentTop + data.rectHeight / 2 - viewportHeight / 2) / viewportHeight;
+                const offset = Math.max(-Math.abs(data.depth), Math.min(Math.abs(data.depth), progressValue * -data.depth));
+                data.target.style.setProperty("--parallax-y", offset + "px");
+            });
+        }
+
+        function benchmark(fn, iterations = 1000) {
+            const start = performance.now();
+            for (let i = 0; i < iterations; i++) {
+                fn();
+            }
+            return performance.now() - start;
+        }
+
+        // Warm up
+        benchmark(originalUpdate, 100);
+        benchmark(optimizedUpdate, 100);
+
+        window.originalTime = benchmark(originalUpdate);
+        window.optimizedTime = benchmark(optimizedUpdate);
+
+        console.log("Original Time:", window.originalTime, "ms");
+        console.log("Optimized Time:", window.optimizedTime, "ms");
+        console.log("Improvement:", ((window.originalTime - window.optimizedTime) / window.originalTime * 100).toFixed(2) + "%");
+
+        document.body.innerHTML += "<p>Original Time: " + window.originalTime + " ms</p>";
+        document.body.innerHTML += "<p>Optimized Time: " + window.optimizedTime + " ms</p>";
+        document.body.innerHTML += "<p>Improvement: " + ((window.originalTime - window.optimizedTime) / window.originalTime * 100).toFixed(2) + "%</p>";
+    </script>
+</body>
+</html>
