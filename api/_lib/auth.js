@@ -116,10 +116,12 @@ function requireAdmin(req, res, sendJson) {
 }
 
 module.exports = {
+  base64url,
   clearSessionCookie,
   createSessionCookie,
   getConfig,
   requireAdmin,
   safeEqual,
+  sign,
   verifySession,
 };
