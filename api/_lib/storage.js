@@ -182,4 +182,5 @@ module.exports = {
   readDesign,
   writeDesign,
   writeUpload,
+  mergeDeep,
 };
