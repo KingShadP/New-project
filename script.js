@@ -740,37 +740,59 @@ function setupNavState() {
 
   let currentActiveId = null;
   let scrollFrame = null;
+  let cachedOffsets = [];
+  let cachedNavRect = null;
+  let cachedLinkRects = new Map();
+
+  const cacheLayouts = () => {
+    // Cache layout properties to eliminate forced synchronous layouts during scroll
+    cachedOffsets = Array.from(sections).map((section) => ({
+      id: section.id,
+      offsetTop: section.offsetTop,
+    }));
+
+    if (nav) {
+      cachedNavRect = nav.getBoundingClientRect();
+      navLinks.forEach((link) => {
+        cachedLinkRects.set(link, link.getBoundingClientRect());
+      });
+    }
+  };
 
   const updateNav = () => {
     const scrollY = window.scrollY;
-    let active = sections[0];
-    sections.forEach((section) => {
+    let activeId = cachedOffsets[0]?.id;
+
+    cachedOffsets.forEach((section) => {
       if (section.offsetTop - 130 <= scrollY) {
-        active = section;
+        activeId = section.id;
       }
     });
 
-    const newActiveId = active ? active.id : null;
-
     // Skip expensive DOM reads/writes if the section hasn't changed
-    if (newActiveId !== currentActiveId) {
-      currentActiveId = newActiveId;
+    if (activeId !== currentActiveId) {
+      currentActiveId = activeId;
 
       navLinks.forEach((link) => {
         link.classList.toggle(
           "is-active",
-          active && link.getAttribute("href") === `#${active.id}`,
+          link.getAttribute("href") === `#${activeId}`,
         );
       });
 
       const activeLink =
-        [...navLinks].find((link) => link.classList.contains("is-active")) ||
-        navLinks[0];
+        [...navLinks].find(
+          (link) => link.getAttribute("href") === `#${activeId}`,
+        ) || navLinks[0];
 
-      if (nav && activeLink) {
-        // These are expensive forced layouts
-        const navRect = nav.getBoundingClientRect();
-        const linkRect = activeLink.getBoundingClientRect();
+      if (
+        nav &&
+        activeLink &&
+        cachedNavRect &&
+        cachedLinkRects.has(activeLink)
+      ) {
+        const navRect = cachedNavRect;
+        const linkRect = cachedLinkRects.get(activeLink);
         nav.style.setProperty("--nav-x", `${linkRect.left - navRect.left}px`);
         nav.style.setProperty("--nav-w", `${linkRect.width}px`);
       }
@@ -785,12 +807,14 @@ function setupNavState() {
     }
   };
 
+  cacheLayouts();
   updateNav();
   window.addEventListener("scroll", requestNavUpdate, { passive: true });
   window.addEventListener(
     "resize",
     () => {
-      currentActiveId = null; // Force recalculation of rects on resize
+      currentActiveId = null; // Force recalculation on resize
+      cacheLayouts();
       requestNavUpdate();
     },
     { passive: true },
@@ -802,18 +826,40 @@ function setupParallax() {
     return;
   }
 
+  let scrollFrame = null;
+  let cachedTargets = [];
+
+  const cacheLayouts = () => {
+    // Temporarily remove transform to get clean bounds
+    parallaxTargets.forEach((target) =>
+      target.style.removeProperty("--parallax-y"),
+    );
+
+    const scrollY = window.scrollY;
+    cachedTargets = Array.from(parallaxTargets).map((target) => {
+      const rect = target.getBoundingClientRect();
+      return {
+        target,
+        // Cache absolute document position to prevent layout thrashing on scroll
+        documentCenterY: rect.top + scrollY + rect.height / 2,
+        depth: Number(target.dataset.depth || 18),
+      };
+    });
+  };
+
   const updateParallax = () => {
     const viewportHeight = window.innerHeight;
+    const scrollY = window.scrollY;
     const intensity = Number(motionConfig.intensity ?? 1);
+    const viewportCenterY = scrollY + viewportHeight / 2;
 
-    parallaxTargets.forEach((target) => {
-      const rect = target.getBoundingClientRect();
+    cachedTargets.forEach(({ target, documentCenterY, depth }) => {
       const progressValue =
-        (rect.top + rect.height / 2 - viewportHeight / 2) / viewportHeight;
-      const depth = Number(target.dataset.depth || 18) * intensity;
+        (documentCenterY - viewportCenterY) / viewportHeight;
+      const effectiveDepth = depth * intensity;
       const offset = Math.max(
-        -Math.abs(depth),
-        Math.min(Math.abs(depth), progressValue * -depth),
+        -Math.abs(effectiveDepth),
+        Math.min(Math.abs(effectiveDepth), progressValue * -effectiveDepth),
       );
       target.style.setProperty("--parallax-y", `${offset}px`);
     });
@@ -827,9 +873,17 @@ function setupParallax() {
     }
   };
 
+  cacheLayouts();
   updateParallax();
   window.addEventListener("scroll", requestParallax, { passive: true });
-  window.addEventListener("resize", requestParallax);
+  window.addEventListener(
+    "resize",
+    () => {
+      cacheLayouts();
+      requestParallax();
+    },
+    { passive: true },
+  );
 }
 
 function emitSpatialClick(event) {

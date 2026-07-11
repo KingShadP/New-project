@@ -1,3 +1,6 @@
 ## 2024-05-24 - Layout Thrashing in Synchronous Scroll Handlers
 **Learning:** Mixing DOM writes (`classList.toggle`, `style.setProperty`) with DOM reads (`getBoundingClientRect`, `offsetTop`) inside a synchronous `scroll` event handler without state caching causes severe layout thrashing (forced synchronous layouts). The browser is forced to recalculate layout multiple times per frame, destroying scroll performance.
 **Action:** Always wrap scroll event handlers in `requestAnimationFrame`. Crucially, cache the current state (like `currentActiveId`) and check if it has actually changed before executing expensive DOM reads/writes, to completely bypass the layout recalculation loop when the section hasn't changed.
+## 2024-11-28 - [Cache DOM Reads in Scroll Handlers]
+**Learning:** Found a specific performance bottleneck where reading layout properties (`offsetTop` and `getBoundingClientRect()`) inside scroll event handlers (specifically `updateNav` and `updateParallax`) causes forced synchronous layouts (layout thrashing), leading to choppy scrolling performance.
+**Action:** When implementing scroll listeners, pre-calculate and cache layout geometry (offsets, heights, positions) during initialization and window resize events, and use these cached values during the fast path of the scroll event instead of hitting the DOM.
