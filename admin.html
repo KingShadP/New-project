@@ -6,7 +6,10 @@
     <meta name="robots" content="noindex, nofollow" />
     <meta name="theme-color" content="#100d0b" />
     <title>KingShadP Control Room</title>
-    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%23090806'/%3E%3Ctext x='50%25' y='55%25' text-anchor='middle' font-family='Georgia,serif' font-size='25' fill='%23d6c4aa'%3EKSP%3C/text%3E%3C/svg%3E" />
+    <link
+      rel="icon"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%23090806'/%3E%3Ctext x='50%25' y='55%25' text-anchor='middle' font-family='Georgia,serif' font-size='25' fill='%23d6c4aa'%3EKSP%3C/text%3E%3C/svg%3E"
+    />
     <link rel="stylesheet" href="admin.css" />
   </head>
   <body>
@@ -16,13 +19,19 @@
           <p class="eyebrow">Private Control</p>
           <h1>KingShadP Control Room</h1>
           <p>
-            Edit live media, products, typography, motion, copy, and the full design JSON for the temporary landing site.
+            Edit live media, products, typography, motion, copy, and the full
+            design JSON for the temporary landing site.
           </p>
 
           <form class="login-form" data-login-form>
             <label>
               Admin password
-              <input type="password" name="password" autocomplete="current-password" required />
+              <input
+                type="password"
+                name="password"
+                autocomplete="current-password"
+                required
+              />
             </label>
             <button type="submit">Enter Control Room</button>
           </form>
@@ -36,7 +45,10 @@
         <div class="entry-panel setup-panel">
           <p class="eyebrow">Setup Required</p>
           <h1>Admin is locked.</h1>
-          <p>Production editing needs two private environment variables before anyone can log in.</p>
+          <p>
+            Production editing needs two private environment variables before
+            anyone can log in.
+          </p>
           <dl>
             <div>
               <dt>KSP_ADMIN_PASSWORD</dt>
@@ -44,7 +56,9 @@
             </div>
             <div>
               <dt>KSP_ADMIN_SECRET</dt>
-              <dd>A long random secret used to sign the admin session cookie.</dd>
+              <dd>
+                A long random secret used to sign the admin session cookie.
+              </dd>
             </div>
           </dl>
         </div>
@@ -56,7 +70,11 @@
             <span>KSP</span>
             <strong>Control Room</strong>
           </a>
-          <nav class="control-nav" data-tabs aria-label="Control room sections"></nav>
+          <nav
+            class="control-nav"
+            data-tabs
+            aria-label="Control room sections"
+          ></nav>
           <div class="storage-card" data-storage-card></div>
         </aside>
 
@@ -68,9 +86,17 @@
             </div>
             <div class="workspace-actions">
               <span class="dirty-indicator" data-dirty-state>Saved</span>
-              <button type="button" data-action="refresh-preview">Refresh Preview</button>
+              <button type="button" data-action="refresh-preview">
+                Refresh Preview
+              </button>
               <button type="button" data-action="reload-design">Reload</button>
-              <button type="button" class="primary-action" data-action="save-design">Save & Publish</button>
+              <button
+                type="button"
+                class="primary-action"
+                data-action="save-design"
+              >
+                Save & Publish
+              </button>
               <button type="button" data-action="logout">Log Out</button>
             </div>
           </header>

@@ -153,7 +153,9 @@ svg {
   font-style: italic;
   stroke-dasharray: 780;
   stroke-dashoffset: 780;
-  animation: drawSignature 1600ms var(--ease) 220ms forwards, fillSignature 900ms ease 1450ms forwards;
+  animation:
+    drawSignature 1600ms var(--ease) 220ms forwards,
+    fillSignature 900ms ease 1450ms forwards;
 }
 
 .gate-signature path,
@@ -299,7 +301,8 @@ body.cursor-labeled .cursor-label {
   border: 1px solid rgba(169, 113, 88, 0.64);
   border-radius: 999px;
   pointer-events: none;
-  transform: translate3d(var(--click-x), var(--click-y), 0) translate(-50%, -50%) scale(0.4);
+  transform: translate3d(var(--click-x), var(--click-y), 0)
+    translate(-50%, -50%) scale(0.4);
   animation: spatialClick 620ms var(--snap) forwards;
 }
 
@@ -509,8 +512,17 @@ main > section[id] {
   z-index: 1;
   pointer-events: none;
   background:
-    linear-gradient(115deg, transparent 0 42%, rgba(216, 220, 221, 0.18) 42% 43%, transparent 43%),
-    radial-gradient(circle at 74% 24%, rgba(216, 220, 221, 0.24), transparent 28%),
+    linear-gradient(
+      115deg,
+      transparent 0 42%,
+      rgba(216, 220, 221, 0.18) 42% 43%,
+      transparent 43%
+    ),
+    radial-gradient(
+      circle at 74% 24%,
+      rgba(216, 220, 221, 0.24),
+      transparent 28%
+    ),
     radial-gradient(circle at 18% 78%, rgba(169, 113, 88, 0.1), transparent 24%);
   opacity: 0.8;
   mix-blend-mode: multiply;
@@ -537,7 +549,11 @@ main > section[id] {
   justify-content: center;
   padding: 148px var(--pad) 92px;
   background:
-    radial-gradient(circle at 15% 18%, rgba(169, 113, 88, 0.12), transparent 30%),
+    radial-gradient(
+      circle at 15% 18%,
+      rgba(169, 113, 88, 0.12),
+      transparent 30%
+    ),
     var(--paper-strong);
 }
 
@@ -794,7 +810,12 @@ main > section[id] {
   content: "";
   position: absolute;
   inset: 0;
-  background: linear-gradient(115deg, transparent 18%, rgba(169, 113, 88, 0.08), transparent 62%);
+  background: linear-gradient(
+    115deg,
+    transparent 18%,
+    rgba(169, 113, 88, 0.08),
+    transparent 62%
+  );
   transform: translateX(-120%);
   transition: transform 680ms var(--snap);
 }
@@ -968,7 +989,12 @@ main > section[id] {
   z-index: 1;
   background:
     linear-gradient(180deg, transparent 42%, rgba(9, 8, 6, 0.42)),
-    linear-gradient(115deg, transparent 28%, rgba(255, 253, 250, 0.18), transparent 58%);
+    linear-gradient(
+      115deg,
+      transparent 28%,
+      rgba(255, 253, 250, 0.18),
+      transparent 58%
+    );
   transform: translateX(-18%);
 }
 
@@ -1211,7 +1237,9 @@ main > section[id] {
   object-position: 76% 42%;
   transform: scale(1.18);
   transform-origin: 76% 42%;
-  transition: opacity 180ms var(--ease), transform 900ms var(--ease);
+  transition:
+    opacity 180ms var(--ease),
+    transform 900ms var(--ease);
 }
 
 .pdp-media:hover img {
@@ -1336,7 +1364,11 @@ main > section[id] {
   inset: 0;
   pointer-events: none;
   background:
-    radial-gradient(circle at 64% 54%, rgba(216, 196, 170, 0.12), transparent 34%),
+    radial-gradient(
+      circle at 64% 54%,
+      rgba(216, 196, 170, 0.12),
+      transparent 34%
+    ),
     linear-gradient(90deg, transparent, rgba(255, 253, 250, 0.04));
   opacity: 0.7;
 }
@@ -1401,7 +1433,12 @@ main > section[id] {
   position: absolute;
   inset: auto 18px 0;
   height: 1px;
-  background: linear-gradient(90deg, transparent, var(--champagne), transparent);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    var(--champagne),
+    transparent
+  );
   opacity: 0;
   transform: translateX(-40%);
   transition:
@@ -1619,7 +1656,9 @@ body.motion-no-visualizer .visualizer span {
 .journal-card img {
   aspect-ratio: 4 / 3;
   background: var(--leather);
-  transition: transform 700ms var(--ease), filter 500ms var(--ease);
+  transition:
+    transform 700ms var(--ease),
+    filter 500ms var(--ease);
 }
 
 .journal-card:hover img,
@@ -1822,12 +1861,14 @@ body.motion-no-visualizer .visualizer span {
 @keyframes spatialClick {
   0% {
     opacity: 0.72;
-    transform: translate3d(var(--click-x), var(--click-y), 0) translate(-50%, -50%) scale(0.35);
+    transform: translate3d(var(--click-x), var(--click-y), 0)
+      translate(-50%, -50%) scale(0.35);
   }
 
   100% {
     opacity: 0;
-    transform: translate3d(var(--click-x), var(--click-y), 0) translate(-50%, -50%) scale(8);
+    transform: translate3d(var(--click-x), var(--click-y), 0)
+      translate(-50%, -50%) scale(8);
   }
 }
 

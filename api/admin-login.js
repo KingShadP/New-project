@@ -13,7 +13,8 @@ module.exports = async function handler(req, res) {
     return sendJson(res, 503, {
       ok: false,
       configured: false,
-      message: "Admin is locked until KSP_ADMIN_PASSWORD and KSP_ADMIN_SECRET are configured.",
+      message:
+        "Admin is locked until KSP_ADMIN_PASSWORD and KSP_ADMIN_SECRET are configured.",
     });
   }
 
@@ -22,16 +23,22 @@ module.exports = async function handler(req, res) {
     const password = String(body.password || "");
 
     if (!password || !safeEqual(password, config.password)) {
-      return sendJson(res, 401, { ok: false, authenticated: false, message: "Wrong password." });
+      return sendJson(res, 401, {
+        ok: false,
+        authenticated: false,
+        message: "Wrong password.",
+      });
     }
 
     res.setHeader("Set-Cookie", createSessionCookie());
     return sendJson(res, 200, {
       ok: true,
       authenticated: true,
-      usesDevelopmentFallback: config.usesDevelopmentFallback,
     });
   } catch (error) {
-    return sendJson(res, error.statusCode || 500, { ok: false, message: error.message });
+    return sendJson(res, error.statusCode || 500, {
+      ok: false,
+      message: error.message,
+    });
   }
 };

@@ -6,13 +6,18 @@ function parseDataUrl(value) {
   const match = /^data:([^;,]+);base64,(.+)$/i.exec(String(value || ""));
 
   if (!match) {
-    throw Object.assign(new Error("Upload must be a base64 data URL."), { statusCode: 400 });
+    throw Object.assign(new Error("Upload must be a base64 data URL."), {
+      statusCode: 400,
+    });
   }
 
   const contentType = match[1];
 
   if (!/^(image|video)\//.test(contentType)) {
-    throw Object.assign(new Error("Only image and video uploads are allowed."), { statusCode: 415 });
+    throw Object.assign(
+      new Error("Only image and video uploads are allowed."),
+      { statusCode: 415 },
+    );
   }
 
   return {
@@ -39,6 +44,9 @@ module.exports = async function handler(req, res) {
 
     return sendJson(res, 200, { ok: true, media });
   } catch (error) {
-    return sendJson(res, error.statusCode || 500, { ok: false, message: error.message });
+    return sendJson(res, error.statusCode || 500, {
+      ok: false,
+      message: error.message,
+    });
   }
 };

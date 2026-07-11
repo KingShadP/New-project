@@ -20,7 +20,6 @@ module.exports = async function handler(req, res) {
     configured: config.configured,
     productionConfigured: config.productionConfigured,
     authenticated: verifySession(req),
-    usesDevelopmentFallback: config.usesDevelopmentFallback,
     storage: getStorageStatus(),
   });
 };

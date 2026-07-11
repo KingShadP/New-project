@@ -8,7 +8,10 @@ module.exports = async function handler(req, res) {
       const design = await readDesign();
       return sendJson(res, 200, { ok: true, design });
     } catch (error) {
-      return sendJson(res, error.statusCode || 500, { ok: false, message: error.message });
+      return sendJson(res, error.statusCode || 500, {
+        ok: false,
+        message: error.message,
+      });
     }
   }
 
@@ -26,6 +29,9 @@ module.exports = async function handler(req, res) {
     const saved = await writeDesign(body.design || body);
     return sendJson(res, 200, { ok: true, design: saved });
   } catch (error) {
-    return sendJson(res, error.statusCode || 500, { ok: false, message: error.message });
+    return sendJson(res, error.statusCode || 500, {
+      ok: false,
+      message: error.message,
+    });
   }
 };
