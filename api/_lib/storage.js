@@ -1,7 +1,11 @@
 const fs = require("node:fs/promises");
 const path = require("node:path");
 
-const DEFAULT_DESIGN_PATH = path.join(process.cwd(), "data", "site-design.default.json");
+const DEFAULT_DESIGN_PATH = path.join(
+  process.cwd(),
+  "data",
+  "site-design.default.json",
+);
 const LOCAL_DESIGN_PATH = path.join(process.cwd(), ".data", "site-design.json");
 const LOCAL_UPLOAD_DIR = path.join(process.cwd(), "assets", "uploads");
 const DESIGN_BLOB_PATH = "control/site-design.json";
@@ -61,7 +65,9 @@ async function readBlobDesign() {
   }
 
   const result = await client.list({ prefix: DESIGN_BLOB_PATH, limit: 1 });
-  const blob = result.blobs.find((item) => item.pathname === DESIGN_BLOB_PATH) || result.blobs[0];
+  const blob =
+    result.blobs.find((item) => item.pathname === DESIGN_BLOB_PATH) ||
+    result.blobs[0];
 
   if (!blob) {
     return null;
@@ -85,8 +91,10 @@ async function readLocalDesign() {
 }
 
 async function readDesign() {
-  const defaults = await loadDefaultDesign();
-  const stored = (await readBlobDesign()) || (await readLocalDesign());
+  const [defaults, stored] = await Promise.all([
+    loadDefaultDesign(),
+    readBlobDesign().then((blob) => blob || readLocalDesign()),
+  ]);
   const design = mergeDeep(defaults, stored || {});
   design.storage = getStorageStatus();
   return design;
@@ -103,7 +111,9 @@ async function writeDesign(nextDesign) {
     const client = await getBlobClient();
 
     if (!client) {
-      throw Object.assign(new Error("Vercel Blob package is not available."), { statusCode: 503 });
+      throw Object.assign(new Error("Vercel Blob package is not available."), {
+        statusCode: 503,
+      });
     }
 
     await client.put(DESIGN_BLOB_PATH, JSON.stringify(design, null, 2), {
@@ -116,7 +126,10 @@ async function writeDesign(nextDesign) {
   }
 
   if (isProduction()) {
-    throw Object.assign(new Error("Persistent storage is not configured for production."), { statusCode: 503 });
+    throw Object.assign(
+      new Error("Persistent storage is not configured for production."),
+      { statusCode: 503 },
+    );
   }
 
   await fs.mkdir(path.dirname(LOCAL_DESIGN_PATH), { recursive: true });
@@ -126,7 +139,11 @@ async function writeDesign(nextDesign) {
 
 function sanitizeFileName(name) {
   const parsed = path.parse(String(name || "upload"));
-  const safeBase = parsed.name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "") || "upload";
+  const safeBase =
+    parsed.name
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/(^-|-$)/g, "") || "upload";
   const safeExt = parsed.ext.toLowerCase().replace(/[^a-z0-9.]/g, "") || ".bin";
   return `${Date.now()}-${safeBase}${safeExt}`;
 }
@@ -138,7 +155,9 @@ async function writeUpload({ buffer, fileName, contentType }) {
     const client = await getBlobClient();
 
     if (!client) {
-      throw Object.assign(new Error("Vercel Blob package is not available."), { statusCode: 503 });
+      throw Object.assign(new Error("Vercel Blob package is not available."), {
+        statusCode: 503,
+      });
     }
 
     const blob = await client.put(`media/${safeName}`, buffer, {
@@ -156,7 +175,10 @@ async function writeUpload({ buffer, fileName, contentType }) {
   }
 
   if (isProduction()) {
-    throw Object.assign(new Error("Persistent media storage is not configured for production."), { statusCode: 503 });
+    throw Object.assign(
+      new Error("Persistent media storage is not configured for production."),
+      { statusCode: 503 },
+    );
   }
 
   await fs.mkdir(LOCAL_UPLOAD_DIR, { recursive: true });
@@ -173,7 +195,11 @@ async function writeUpload({ buffer, fileName, contentType }) {
 function getStorageStatus() {
   return {
     persistent: hasBlobToken(),
-    mode: hasBlobToken() ? "vercel-blob" : isProduction() ? "unconfigured" : "local-dev",
+    mode: hasBlobToken()
+      ? "vercel-blob"
+      : isProduction()
+        ? "unconfigured"
+        : "local-dev",
   };
 }
 
