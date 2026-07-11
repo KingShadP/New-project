@@ -60,7 +60,10 @@ function pathParts(path) {
 }
 
 function getPath(path) {
-  return pathParts(path).reduce((target, key) => (target == null ? undefined : target[key]), state.design);
+  return pathParts(path).reduce(
+    (target, key) => (target == null ? undefined : target[key]),
+    state.design,
+  );
 }
 
 function setPath(path, value) {
@@ -93,7 +96,12 @@ function showView(name) {
 
 function showNotice(message, tone = "muted") {
   els.notice.textContent = message || "";
-  els.notice.style.color = tone === "danger" ? "var(--danger)" : tone === "ok" ? "var(--ok)" : "var(--muted)";
+  els.notice.style.color =
+    tone === "danger"
+      ? "var(--danger)"
+      : tone === "ok"
+        ? "var(--ok)"
+        : "var(--muted)";
 }
 
 function markDirty() {
@@ -170,7 +178,7 @@ function renderTabs() {
           <span>${escapeHtml(tab.label)}</span>
           <span>${tab.id === "raw" ? "{}" : ""}</span>
         </button>
-      `
+      `,
     )
     .join("");
 }
@@ -178,7 +186,9 @@ function renderTabs() {
 function renderStorage() {
   const storage = state.design?.storage || state.session?.storage || {};
   const mode = storage.mode || "unknown";
-  const persistent = storage.persistent ? "Persistent Vercel Blob storage is active." : "Local/dev storage only. Production publish needs Blob.";
+  const persistent = storage.persistent
+    ? "Persistent Vercel Blob storage is active."
+    : "Local/dev storage only. Production publish needs Blob.";
 
   els.storage.innerHTML = `
     <strong>Storage</strong>
@@ -214,7 +224,9 @@ function field(path, label, options = {}) {
   const value = getPath(path) ?? "";
   const type = options.type || "text";
   const wide = options.wide ? " wide" : "";
-  const valueType = options.valueType || (type === "number" || type === "range" ? "number" : "string");
+  const valueType =
+    options.valueType ||
+    (type === "number" || type === "range" ? "number" : "string");
 
   if (type === "textarea") {
     return `
@@ -240,7 +252,10 @@ function field(path, label, options = {}) {
         ${escapeHtml(label)}
         <select data-path="${escapeHtml(path)}" data-value-type="${valueType}">
           ${(options.choices || [])
-            .map((choice) => `<option value="${escapeHtml(choice.value)}" ${String(value) === String(choice.value) ? "selected" : ""}>${escapeHtml(choice.label)}</option>`)
+            .map(
+              (choice) =>
+                `<option value="${escapeHtml(choice.value)}" ${String(value) === String(choice.value) ? "selected" : ""}>${escapeHtml(choice.label)}</option>`,
+            )
             .join("")}
         </select>
       </label>
@@ -306,15 +321,24 @@ function mediaTargetOptions() {
   ];
 
   (state.design.chapters || []).forEach((chapter, index) => {
-    options.push({ value: `chapters.${index}.image`, label: `Chapter: ${chapter.label || chapter.title || index + 1}` });
+    options.push({
+      value: `chapters.${index}.image`,
+      label: `Chapter: ${chapter.label || chapter.title || index + 1}`,
+    });
   });
 
   (state.design.products || []).forEach((product, index) => {
-    options.push({ value: `products.${index}.image`, label: `Product: ${product.title || index + 1}` });
+    options.push({
+      value: `products.${index}.image`,
+      label: `Product: ${product.title || index + 1}`,
+    });
   });
 
   (state.design.journal?.entries || []).forEach((entry, index) => {
-    options.push({ value: `journal.entries.${index}.image`, label: `Journal: ${entry.title || index + 1}` });
+    options.push({
+      value: `journal.entries.${index}.image`,
+      label: `Journal: ${entry.title || index + 1}`,
+    });
   });
 
   return options;
@@ -323,7 +347,12 @@ function mediaTargetOptions() {
 function renderTargetSelect(id) {
   return `
     <select id="${escapeHtml(id)}">
-      ${mediaTargetOptions().map((item) => `<option value="${escapeHtml(item.value)}">${escapeHtml(item.label)}</option>`).join("")}
+      ${mediaTargetOptions()
+        .map(
+          (item) =>
+            `<option value="${escapeHtml(item.value)}">${escapeHtml(item.label)}</option>`,
+        )
+        .join("")}
     </select>
   `;
 }
@@ -370,7 +399,9 @@ function renderMedia() {
         <div class="media-library">
           ${media
             .map((item, index) => {
-              const isVideo = item.kind === "video" || /\.(mp4|webm|mov)$/i.test(item.url || "");
+              const isVideo =
+                item.kind === "video" ||
+                /\.(mp4|webm|mov)$/i.test(item.url || "");
               return `
                 <article class="media-card">
                   ${
@@ -429,7 +460,7 @@ function renderTheme() {
     ["theme.champagne", "Champagne"],
     ["theme.rose", "Rose accent"],
     ["theme.platinum", "Platinum"],
-    ["theme.reverse", "Reverse"]
+    ["theme.reverse", "Reverse"],
   ];
 
   return `
@@ -495,6 +526,53 @@ function renderHero() {
   `;
 }
 
+function renderProductList(products) {
+  return `
+    <section class="panel-block third">
+      <h2>Products</h2>
+      <div class="item-list">
+        ${products
+          .map(
+            (item, index) => `
+              <button type="button" class="${index === state.activeProduct ? "is-active" : ""}" data-action="select-product" data-index="${index}">
+                <span>${escapeHtml(item.title || "Untitled product")}</span>
+                <span>${escapeHtml(item.collection || "")}</span>
+              </button>
+            `,
+          )
+          .join("")}
+      </div>
+      <div class="inline-actions">
+        <button type="button" data-action="add-product">Add</button>
+        <button type="button" data-action="duplicate-product">Duplicate</button>
+        <button type="button" data-action="remove-product">Remove</button>
+      </div>
+    </section>
+  `;
+}
+
+function renderProductForm(product, base) {
+  return `
+    <section class="panel-block">
+      <h2>${escapeHtml(product.title || "Product")}</h2>
+      <div class="form-grid">
+        ${field(`${base}.id`, "ID")}
+        ${field(`${base}.title`, "Title")}
+        ${field(`${base}.collection`, "Collection")}
+        ${field(`${base}.type`, "Type label")}
+        ${field(`${base}.category`, "Filter category")}
+        ${field(`${base}.price`, "Price", { type: "number", min: 0, step: 1 })}
+        ${field(`${base}.image`, "Image URL", { wide: true })}
+        ${field(`${base}.imageAlt`, "Image alt", { wide: true })}
+        ${field(`${base}.position`, "Image object position")}
+        ${field(`${base}.cropClass`, "Crop class")}
+        ${field(`${base}.story`, "Story", { type: "textarea", wide: true, rows: 4 })}
+        ${field(`${base}.material`, "Material", { type: "textarea", wide: true, rows: 3 })}
+      </div>
+    </section>
+  `;
+}
+
 function renderProducts() {
   const products = state.design.products || [];
   const product = products[state.activeProduct] || products[0];
@@ -507,43 +585,8 @@ function renderProducts() {
 
   return `
     <div class="panel-grid">
-      <section class="panel-block third">
-        <h2>Products</h2>
-        <div class="item-list">
-          ${products
-            .map(
-              (item, index) => `
-                <button type="button" class="${index === state.activeProduct ? "is-active" : ""}" data-action="select-product" data-index="${index}">
-                  <span>${escapeHtml(item.title || "Untitled product")}</span>
-                  <span>${escapeHtml(item.collection || "")}</span>
-                </button>
-              `
-            )
-            .join("")}
-        </div>
-        <div class="inline-actions">
-          <button type="button" data-action="add-product">Add</button>
-          <button type="button" data-action="duplicate-product">Duplicate</button>
-          <button type="button" data-action="remove-product">Remove</button>
-        </div>
-      </section>
-      <section class="panel-block">
-        <h2>${escapeHtml(product.title || "Product")}</h2>
-        <div class="form-grid">
-          ${field(`${base}.id`, "ID")}
-          ${field(`${base}.title`, "Title")}
-          ${field(`${base}.collection`, "Collection")}
-          ${field(`${base}.type`, "Type label")}
-          ${field(`${base}.category`, "Filter category")}
-          ${field(`${base}.price`, "Price", { type: "number", min: 0, step: 1 })}
-          ${field(`${base}.image`, "Image URL", { wide: true })}
-          ${field(`${base}.imageAlt`, "Image alt", { wide: true })}
-          ${field(`${base}.position`, "Image object position")}
-          ${field(`${base}.cropClass`, "Crop class")}
-          ${field(`${base}.story`, "Story", { type: "textarea", wide: true, rows: 4 })}
-          ${field(`${base}.material`, "Material", { type: "textarea", wide: true, rows: 3 })}
-        </div>
-      </section>
+      ${renderProductList(products)}
+      ${renderProductForm(product, base)}
     </div>
   `;
 }
@@ -570,7 +613,7 @@ function renderChapters() {
                   <span>${escapeHtml(item.label || "Chapter")}</span>
                   <span>${escapeHtml(item.key || "")}</span>
                 </button>
-              `
+              `,
             )
             .join("")}
         </div>
@@ -605,7 +648,10 @@ function renderMusic() {
         ${field("music.trackTitle", "Track title")}
         ${field("music.trackSubtitle", "Track subtitle")}
         ${(state.design.music?.links || [])
-          .map((link, index) => `${field(`music.links.${index}.label`, `Link ${index + 1} label`)}${field(`music.links.${index}.href`, `Link ${index + 1} href`)}`)
+          .map(
+            (link, index) =>
+              `${field(`music.links.${index}.label`, `Link ${index + 1} label`)}${field(`music.links.${index}.href`, `Link ${index + 1} href`)}`,
+          )
           .join("")}
       </div>
     </section>
@@ -649,7 +695,7 @@ function renderJournal() {
                   <span>${escapeHtml(item.title || "Journal tile")}</span>
                   <span>${escapeHtml(item.label || "")}</span>
                 </button>
-              `
+              `,
             )
             .join("")}
         </div>
@@ -821,7 +867,11 @@ function duplicateProduct() {
     return;
   }
 
-  const copy = { ...clone(product), id: `${slugify(product.id || product.title)}-copy`, title: `${product.title || "Piece"} Copy` };
+  const copy = {
+    ...clone(product),
+    id: `${slugify(product.id || product.title)}-copy`,
+    title: `${product.title || "Piece"} Copy`,
+  };
   products.splice(state.activeProduct + 1, 0, copy);
   state.activeProduct += 1;
   markDirty();
@@ -955,8 +1005,10 @@ document.addEventListener("click", async (event) => {
     } else if (action === "add-media-url") {
       addManualMedia();
     } else if (action === "use-media") {
-      const item = state.design.mediaLibrary?.[Number(target.dataset.mediaIndex)];
-      const selected = document.querySelector("#media-target")?.value || "hero.image";
+      const item =
+        state.design.mediaLibrary?.[Number(target.dataset.mediaIndex)];
+      const selected =
+        document.querySelector("#media-target")?.value || "hero.image";
       applyMedia(item?.url, selected);
       markDirty();
       renderPanel();
