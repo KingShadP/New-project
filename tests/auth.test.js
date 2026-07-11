@@ -1,6 +1,6 @@
 const test = require("node:test");
 const assert = require("node:assert");
-const { parseCookies } = require("./auth.js");
+const { parseCookies } = require("../api/_lib/auth.js");
 
 test("parseCookies", async (t) => {
   await t.test("handles missing cookie header", () => {
