@@ -1,0 +1,16 @@
+.git
+.github
+.jules
+.wrangler
+node_modules
+
+.assetsignore
+.gitignore
+.vercelignore
+package.json
+package-lock.json
+vercel.json
+wrangler.jsonc
+
+api
+data
