@@ -1,0 +1,3 @@
+## 2024-07-24 - Prevent Layout Thrashing in Scroll Event Listeners
+**Learning:** Calling `getBoundingClientRect()` synchronously inside scroll event handlers forces the browser to recalculate layouts, leading to layout thrashing and poor performance. In `script.js`'s `setupNavState`, this was happening on every scroll tick even if the active section hadn't changed.
+**Action:** Implemented state caching (e.g., storing `currentActiveId`) so that DOM properties (like classes) and dimension calculations (using `getBoundingClientRect()`) are only updated when the active element actually changes. Added a window resize listener to recalculate dimensions if the layout geometry changes independently of scrolling.
