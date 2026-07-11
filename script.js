@@ -157,15 +157,6 @@ let cart = [];
 let progress = 18;
 let progressTimer;
 
-function escapeHTML(value) {
-  return String(value ?? "")
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#039;");
-}
-
 function slugify(value) {
   return String(value || "item")
     .toLowerCase()

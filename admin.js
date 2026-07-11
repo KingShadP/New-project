@@ -42,15 +42,6 @@ const state = {
   session: null,
 };
 
-function escapeHtml(value) {
-  return String(value ?? "")
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#039;");
-}
-
 function clone(value) {
   return JSON.parse(JSON.stringify(value));
 }
@@ -60,7 +51,10 @@ function pathParts(path) {
 }
 
 function getPath(path) {
-  return pathParts(path).reduce((target, key) => (target == null ? undefined : target[key]), state.design);
+  return pathParts(path).reduce(
+    (target, key) => (target == null ? undefined : target[key]),
+    state.design,
+  );
 }
 
 function setPath(path, value) {
@@ -93,7 +87,12 @@ function showView(name) {
 
 function showNotice(message, tone = "muted") {
   els.notice.textContent = message || "";
-  els.notice.style.color = tone === "danger" ? "var(--danger)" : tone === "ok" ? "var(--ok)" : "var(--muted)";
+  els.notice.style.color =
+    tone === "danger"
+      ? "var(--danger)"
+      : tone === "ok"
+        ? "var(--ok)"
+        : "var(--muted)";
 }
 
 function markDirty() {
@@ -167,10 +166,10 @@ function renderTabs() {
     .map(
       (tab) => `
         <button type="button" class="${tab.id === state.activeTab ? "is-active" : ""}" data-action="select-tab" data-tab="${tab.id}">
-          <span>${escapeHtml(tab.label)}</span>
+          <span>${escapeHTML(tab.label)}</span>
           <span>${tab.id === "raw" ? "{}" : ""}</span>
         </button>
-      `
+      `,
     )
     .join("");
 }
@@ -178,12 +177,14 @@ function renderTabs() {
 function renderStorage() {
   const storage = state.design?.storage || state.session?.storage || {};
   const mode = storage.mode || "unknown";
-  const persistent = storage.persistent ? "Persistent Vercel Blob storage is active." : "Local/dev storage only. Production publish needs Blob.";
+  const persistent = storage.persistent
+    ? "Persistent Vercel Blob storage is active."
+    : "Local/dev storage only. Production publish needs Blob.";
 
   els.storage.innerHTML = `
     <strong>Storage</strong>
-    <span>${escapeHtml(mode)}</span><br />
-    <span>${escapeHtml(persistent)}</span>
+    <span>${escapeHTML(mode)}</span><br />
+    <span>${escapeHTML(persistent)}</span>
   `;
 }
 
@@ -214,13 +215,15 @@ function field(path, label, options = {}) {
   const value = getPath(path) ?? "";
   const type = options.type || "text";
   const wide = options.wide ? " wide" : "";
-  const valueType = options.valueType || (type === "number" || type === "range" ? "number" : "string");
+  const valueType =
+    options.valueType ||
+    (type === "number" || type === "range" ? "number" : "string");
 
   if (type === "textarea") {
     return `
       <label class="${wide}">
-        ${escapeHtml(label)}
-        <textarea data-path="${escapeHtml(path)}" data-value-type="${valueType}" rows="${options.rows || 4}">${escapeHtml(value)}</textarea>
+        ${escapeHTML(label)}
+        <textarea data-path="${escapeHTML(path)}" data-value-type="${valueType}" rows="${options.rows || 4}">${escapeHTML(value)}</textarea>
       </label>
     `;
   }
@@ -228,8 +231,8 @@ function field(path, label, options = {}) {
   if (type === "checkbox") {
     return `
       <label class="check-row${wide}">
-        <span>${escapeHtml(label)}</span>
-        <input type="checkbox" data-path="${escapeHtml(path)}" data-value-type="boolean" ${value ? "checked" : ""} />
+        <span>${escapeHTML(label)}</span>
+        <input type="checkbox" data-path="${escapeHTML(path)}" data-value-type="boolean" ${value ? "checked" : ""} />
       </label>
     `;
   }
@@ -237,10 +240,13 @@ function field(path, label, options = {}) {
   if (type === "select") {
     return `
       <label class="${wide}">
-        ${escapeHtml(label)}
-        <select data-path="${escapeHtml(path)}" data-value-type="${valueType}">
+        ${escapeHTML(label)}
+        <select data-path="${escapeHTML(path)}" data-value-type="${valueType}">
           ${(options.choices || [])
-            .map((choice) => `<option value="${escapeHtml(choice.value)}" ${String(value) === String(choice.value) ? "selected" : ""}>${escapeHtml(choice.label)}</option>`)
+            .map(
+              (choice) =>
+                `<option value="${escapeHTML(choice.value)}" ${String(value) === String(choice.value) ? "selected" : ""}>${escapeHTML(choice.label)}</option>`,
+            )
             .join("")}
         </select>
       </label>
@@ -250,23 +256,23 @@ function field(path, label, options = {}) {
   if (type === "color") {
     return `
       <label class="color-swatch${wide}">
-        <input type="color" data-path="${escapeHtml(path)}" data-value-type="string" value="${escapeHtml(value)}" />
-        <span>${escapeHtml(label)}</span>
+        <input type="color" data-path="${escapeHTML(path)}" data-value-type="string" value="${escapeHTML(value)}" />
+        <span>${escapeHTML(label)}</span>
       </label>
     `;
   }
 
   return `
     <label class="${wide}">
-      ${escapeHtml(label)}
+      ${escapeHTML(label)}
       <input
-        type="${escapeHtml(type)}"
-        data-path="${escapeHtml(path)}"
+        type="${escapeHTML(type)}"
+        data-path="${escapeHTML(path)}"
         data-value-type="${valueType}"
-        value="${escapeHtml(value)}"
-        ${options.min != null ? `min="${escapeHtml(options.min)}"` : ""}
-        ${options.max != null ? `max="${escapeHtml(options.max)}"` : ""}
-        ${options.step != null ? `step="${escapeHtml(options.step)}"` : ""}
+        value="${escapeHTML(value)}"
+        ${options.min != null ? `min="${escapeHTML(options.min)}"` : ""}
+        ${options.max != null ? `max="${escapeHTML(options.max)}"` : ""}
+        ${options.step != null ? `step="${escapeHTML(options.step)}"` : ""}
       />
     </label>
   `;
@@ -285,7 +291,7 @@ function renderDashboard() {
           <div class="metric"><span>Products</span><strong>${products.length}</strong></div>
           <div class="metric"><span>Media Items</span><strong>${media.length}</strong></div>
           <div class="metric"><span>Journal Tiles</span><strong>${journal.length}</strong></div>
-          <div class="metric"><span>Storage</span><strong>${escapeHtml(storage.mode || "local")}</strong></div>
+          <div class="metric"><span>Storage</span><strong>${escapeHTML(storage.mode || "local")}</strong></div>
         </div>
       </section>
       <section class="panel-block">
@@ -306,15 +312,24 @@ function mediaTargetOptions() {
   ];
 
   (state.design.chapters || []).forEach((chapter, index) => {
-    options.push({ value: `chapters.${index}.image`, label: `Chapter: ${chapter.label || chapter.title || index + 1}` });
+    options.push({
+      value: `chapters.${index}.image`,
+      label: `Chapter: ${chapter.label || chapter.title || index + 1}`,
+    });
   });
 
   (state.design.products || []).forEach((product, index) => {
-    options.push({ value: `products.${index}.image`, label: `Product: ${product.title || index + 1}` });
+    options.push({
+      value: `products.${index}.image`,
+      label: `Product: ${product.title || index + 1}`,
+    });
   });
 
   (state.design.journal?.entries || []).forEach((entry, index) => {
-    options.push({ value: `journal.entries.${index}.image`, label: `Journal: ${entry.title || index + 1}` });
+    options.push({
+      value: `journal.entries.${index}.image`,
+      label: `Journal: ${entry.title || index + 1}`,
+    });
   });
 
   return options;
@@ -322,8 +337,13 @@ function mediaTargetOptions() {
 
 function renderTargetSelect(id) {
   return `
-    <select id="${escapeHtml(id)}">
-      ${mediaTargetOptions().map((item) => `<option value="${escapeHtml(item.value)}">${escapeHtml(item.label)}</option>`).join("")}
+    <select id="${escapeHTML(id)}">
+      ${mediaTargetOptions()
+        .map(
+          (item) =>
+            `<option value="${escapeHTML(item.value)}">${escapeHTML(item.label)}</option>`,
+        )
+        .join("")}
     </select>
   `;
 }
@@ -370,15 +390,17 @@ function renderMedia() {
         <div class="media-library">
           ${media
             .map((item, index) => {
-              const isVideo = item.kind === "video" || /\.(mp4|webm|mov)$/i.test(item.url || "");
+              const isVideo =
+                item.kind === "video" ||
+                /\.(mp4|webm|mov)$/i.test(item.url || "");
               return `
                 <article class="media-card">
                   ${
                     isVideo
-                      ? `<video src="${escapeHtml(item.url)}" muted playsinline></video>`
-                      : `<img src="${escapeHtml(item.url)}" alt="${escapeHtml(item.label || "Media item")}" loading="lazy" />`
+                      ? `<video src="${escapeHTML(item.url)}" muted playsinline></video>`
+                      : `<img src="${escapeHTML(item.url)}" alt="${escapeHTML(item.label || "Media item")}" loading="lazy" />`
                   }
-                  <strong>${escapeHtml(item.label || item.url)}</strong>
+                  <strong>${escapeHTML(item.label || item.url)}</strong>
                   <button type="button" data-action="use-media" data-media-index="${index}">Use Selected Target</button>
                 </article>
               `;
@@ -407,7 +429,7 @@ function renderTypography() {
       </section>
       <section class="panel-block half">
         <h2>Preview</h2>
-        <div class="font-preview" style="--preview-display:${escapeHtml(state.design.typography.displayFamily)};--preview-body:${escapeHtml(state.design.typography.bodyFamily)}">
+        <div class="font-preview" style="--preview-display:${escapeHTML(state.design.typography.displayFamily)};--preview-body:${escapeHTML(state.design.typography.bodyFamily)}">
           <strong>KingShadP</strong>
           <span>A complete visual system should let the typography carry the same premium motion as the images and product rooms.</span>
         </div>
@@ -429,7 +451,7 @@ function renderTheme() {
     ["theme.champagne", "Champagne"],
     ["theme.rose", "Rose accent"],
     ["theme.platinum", "Platinum"],
-    ["theme.reverse", "Reverse"]
+    ["theme.reverse", "Reverse"],
   ];
 
   return `
@@ -514,10 +536,10 @@ function renderProducts() {
             .map(
               (item, index) => `
                 <button type="button" class="${index === state.activeProduct ? "is-active" : ""}" data-action="select-product" data-index="${index}">
-                  <span>${escapeHtml(item.title || "Untitled product")}</span>
-                  <span>${escapeHtml(item.collection || "")}</span>
+                  <span>${escapeHTML(item.title || "Untitled product")}</span>
+                  <span>${escapeHTML(item.collection || "")}</span>
                 </button>
-              `
+              `,
             )
             .join("")}
         </div>
@@ -528,7 +550,7 @@ function renderProducts() {
         </div>
       </section>
       <section class="panel-block">
-        <h2>${escapeHtml(product.title || "Product")}</h2>
+        <h2>${escapeHTML(product.title || "Product")}</h2>
         <div class="form-grid">
           ${field(`${base}.id`, "ID")}
           ${field(`${base}.title`, "Title")}
@@ -567,16 +589,16 @@ function renderChapters() {
             .map(
               (item, index) => `
                 <button type="button" class="${index === state.activeChapter ? "is-active" : ""}" data-action="select-chapter" data-index="${index}">
-                  <span>${escapeHtml(item.label || "Chapter")}</span>
-                  <span>${escapeHtml(item.key || "")}</span>
+                  <span>${escapeHTML(item.label || "Chapter")}</span>
+                  <span>${escapeHTML(item.key || "")}</span>
                 </button>
-              `
+              `,
             )
             .join("")}
         </div>
       </section>
       <section class="panel-block">
-        <h2>${escapeHtml(chapter.label || "Chapter")}</h2>
+        <h2>${escapeHTML(chapter.label || "Chapter")}</h2>
         <div class="form-grid">
           ${field("sections.collectionTitle", "Collection heading", { wide: true })}
           ${field("sections.collectionBody", "Collection body", { type: "textarea", wide: true, rows: 3 })}
@@ -605,7 +627,10 @@ function renderMusic() {
         ${field("music.trackTitle", "Track title")}
         ${field("music.trackSubtitle", "Track subtitle")}
         ${(state.design.music?.links || [])
-          .map((link, index) => `${field(`music.links.${index}.label`, `Link ${index + 1} label`)}${field(`music.links.${index}.href`, `Link ${index + 1} href`)}`)
+          .map(
+            (link, index) =>
+              `${field(`music.links.${index}.label`, `Link ${index + 1} label`)}${field(`music.links.${index}.href`, `Link ${index + 1} href`)}`,
+          )
           .join("")}
       </div>
     </section>
@@ -646,10 +671,10 @@ function renderJournal() {
             .map(
               (item, index) => `
                 <button type="button" class="${index === state.activeJournal ? "is-active" : ""}" data-action="select-journal" data-index="${index}">
-                  <span>${escapeHtml(item.title || "Journal tile")}</span>
-                  <span>${escapeHtml(item.label || "")}</span>
+                  <span>${escapeHTML(item.title || "Journal tile")}</span>
+                  <span>${escapeHTML(item.label || "")}</span>
                 </button>
-              `
+              `,
             )
             .join("")}
         </div>
@@ -682,7 +707,7 @@ function renderRaw() {
     <section class="panel-block">
       <h2>Raw design JSON</h2>
       <p>Edit the full site contract directly when you need absolute control.</p>
-      <textarea class="raw-json" id="raw-json">${escapeHtml(JSON.stringify(payload, null, 2))}</textarea>
+      <textarea class="raw-json" id="raw-json">${escapeHTML(JSON.stringify(payload, null, 2))}</textarea>
       <div class="inline-actions">
         <button type="button" class="panel-button" data-action="apply-raw-json">Apply JSON</button>
       </div>
@@ -821,7 +846,11 @@ function duplicateProduct() {
     return;
   }
 
-  const copy = { ...clone(product), id: `${slugify(product.id || product.title)}-copy`, title: `${product.title || "Piece"} Copy` };
+  const copy = {
+    ...clone(product),
+    id: `${slugify(product.id || product.title)}-copy`,
+    title: `${product.title || "Piece"} Copy`,
+  };
   products.splice(state.activeProduct + 1, 0, copy);
   state.activeProduct += 1;
   markDirty();
@@ -955,8 +984,10 @@ document.addEventListener("click", async (event) => {
     } else if (action === "add-media-url") {
       addManualMedia();
     } else if (action === "use-media") {
-      const item = state.design.mediaLibrary?.[Number(target.dataset.mediaIndex)];
-      const selected = document.querySelector("#media-target")?.value || "hero.image";
+      const item =
+        state.design.mediaLibrary?.[Number(target.dataset.mediaIndex)];
+      const selected =
+        document.querySelector("#media-target")?.value || "hero.image";
       applyMedia(item?.url, selected);
       markDirty();
       renderPanel();
