@@ -9,7 +9,8 @@ const defaultProducts = {
     image: "assets/derived/giragon-hoodie-detail.png",
     imageAlt: "Giragon Crown Hoodie in matte black",
     position: "52% 48%",
-    story: "Heavy matte black fleece with a controlled Giragon mark and rose-gold accessory language.",
+    story:
+      "Heavy matte black fleece with a controlled Giragon mark and rose-gold accessory language.",
     material: "Heavy fleece, satin neck label, rose-gold stitch detail",
     cropClass: "crop-hoodie",
   },
@@ -23,7 +24,8 @@ const defaultProducts = {
     image: "assets/visual-samples/sample-01-luxury-drop-vault.png",
     imageAlt: "KSP Signature Tee presented in a private drop vault",
     position: "72% 58%",
-    story: "A clean signature tee built for the first layer of the KingShadP uniform.",
+    story:
+      "A clean signature tee built for the first layer of the KingShadP uniform.",
     material: "Midweight cotton, soft wash, signature chest mark",
     cropClass: "crop-vault",
   },
@@ -37,7 +39,8 @@ const defaultProducts = {
     image: "assets/visual-samples/sample-03-private-archive-grid.png",
     imageAlt: "Platinum Long Sleeve archive study",
     position: "54% 40%",
-    story: "A long sleeve shaped around platinum gallery space and the private archive grid.",
+    story:
+      "A long sleeve shaped around platinum gallery space and the private archive grid.",
     material: "Cotton jersey, rib cuff, archival screen print",
     cropClass: "crop-archive",
   },
@@ -51,7 +54,8 @@ const defaultProducts = {
     image: "assets/visual-samples/sample-03-private-archive-grid.png",
     imageAlt: "Black Issue Shorts textile detail",
     position: "88% 42%",
-    story: "Black fabric, quiet branding, and a direct summer cut for the KSP chapter.",
+    story:
+      "Black fabric, quiet branding, and a direct summer cut for the KSP chapter.",
     material: "Heavy cotton twill, drawcord waist, tonal mark",
     cropClass: "crop-leather",
   },
@@ -65,7 +69,8 @@ const defaultProducts = {
     image: "assets/photos/hero-architecture.png",
     imageAlt: "Museum Shell Jacket editorial architectural study",
     position: "62% 48%",
-    story: "A structured shell jacket made for the museum corridor side of the KingShadP world.",
+    story:
+      "A structured shell jacket made for the museum corridor side of the KingShadP world.",
     material: "Water-resistant shell, mesh lining, interior relic label",
     cropClass: "crop-architecture",
   },
@@ -79,7 +84,8 @@ const defaultProducts = {
     image: "assets/visual-samples/sample-01-luxury-drop-vault.png",
     imageAlt: "Rose Vault Hoodie with Giragon relic detail",
     position: "82% 74%",
-    story: "A vault-weight hoodie with rose-gold detail and restrained Giragon placement.",
+    story:
+      "A vault-weight hoodie with rose-gold detail and restrained Giragon placement.",
     material: "Heavy fleece, brushed interior, rose-gold embroidery",
     cropClass: "crop-relic",
   },
@@ -115,7 +121,9 @@ const playButton = document.querySelector(".play-button");
 const player = document.querySelector(".player");
 const musicRoom = document.querySelector(".music-room");
 const progressFill = document.querySelector(".progress-fill");
-const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+const reducedMotion = window.matchMedia(
+  "(prefers-reduced-motion: reduce)",
+).matches;
 
 const pdp = {
   image: document.querySelector("#pdp-image"),
@@ -148,15 +156,6 @@ let selectedSize = "M";
 let cart = [];
 let progress = 18;
 let progressTimer;
-
-function escapeHTML(value) {
-  return String(value ?? "")
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#039;");
-}
 
 function slugify(value) {
   return String(value || "item")
@@ -262,8 +261,16 @@ function applyMeta(site = {}) {
 
   if (site.description) {
     setAttribute('meta[name="description"]', "content", site.description);
-    setAttribute('meta[property="og:description"]', "content", site.description);
-    setAttribute('meta[name="twitter:description"]', "content", site.description);
+    setAttribute(
+      'meta[property="og:description"]',
+      "content",
+      site.description,
+    );
+    setAttribute(
+      'meta[name="twitter:description"]',
+      "content",
+      site.description,
+    );
   }
 
   if (site.canonical) {
@@ -288,26 +295,52 @@ function applyTheme(theme = {}) {
     reverse: "--reverse",
   };
 
-  Object.entries(themeMap).forEach(([key, variable]) => setCSSVar(variable, theme[key]));
+  Object.entries(themeMap).forEach(([key, variable]) =>
+    setCSSVar(variable, theme[key]),
+  );
 }
 
 function applyTypography(typography = {}) {
   setCSSVar("--font-display", typography.displayFamily);
   setCSSVar("--font-body", typography.bodyFamily);
-  setCSSVar("--hero-size", typography.heroSize ? `${typography.heroSize}px` : null);
-  setCSSVar("--section-title-size", typography.sectionTitleSize ? `${typography.sectionTitleSize}px` : null);
-  setCSSVar("--panel-title-size", typography.panelTitleSize ? `${typography.panelTitleSize}px` : null);
-  setCSSVar("--body-size", typography.bodySize ? `${typography.bodySize}px` : null);
-  setCSSVar("--nav-size", typography.navSize ? `${typography.navSize}px` : null);
+  setCSSVar(
+    "--hero-size",
+    typography.heroSize ? `${typography.heroSize}px` : null,
+  );
+  setCSSVar(
+    "--section-title-size",
+    typography.sectionTitleSize ? `${typography.sectionTitleSize}px` : null,
+  );
+  setCSSVar(
+    "--panel-title-size",
+    typography.panelTitleSize ? `${typography.panelTitleSize}px` : null,
+  );
+  setCSSVar(
+    "--body-size",
+    typography.bodySize ? `${typography.bodySize}px` : null,
+  );
+  setCSSVar(
+    "--nav-size",
+    typography.navSize ? `${typography.navSize}px` : null,
+  );
 }
 
 function applyMotion(motion = {}) {
   motionConfig = { ...motionConfig, ...motion };
   const intensity = Number(motionConfig.intensity ?? 1);
   setCSSVar("--motion-intensity", String(intensity));
-  document.body.classList.toggle("motion-no-cursor", !motionConfig.cursor || reducedMotion);
-  document.body.classList.toggle("motion-muted", intensity <= 0.2 || reducedMotion);
-  document.body.classList.toggle("motion-no-visualizer", !motionConfig.musicVisualizer);
+  document.body.classList.toggle(
+    "motion-no-cursor",
+    !motionConfig.cursor || reducedMotion,
+  );
+  document.body.classList.toggle(
+    "motion-muted",
+    intensity <= 0.2 || reducedMotion,
+  );
+  document.body.classList.toggle(
+    "motion-no-visualizer",
+    !motionConfig.musicVisualizer,
+  );
   applyAmbientVideo(motionConfig.ambientVideo);
 }
 
@@ -345,8 +378,16 @@ function applyHero(hero = {}) {
   setText(".hero-copy > p:not(.signature-word)", hero.body);
   setText(".hero-actions .button-dark span", hero.primaryLabel);
   setText(".hero-actions .button-light span", hero.secondaryLabel);
-  setAttribute(".hero-actions .button-dark", "href", hero.primaryHref || "#shop");
-  setAttribute(".hero-actions .button-light", "href", hero.secondaryHref || "#music");
+  setAttribute(
+    ".hero-actions .button-dark",
+    "href",
+    hero.primaryHref || "#shop",
+  );
+  setAttribute(
+    ".hero-actions .button-light",
+    "href",
+    hero.secondaryHref || "#music",
+  );
   setAttribute(".hero-visual img", "src", hero.image);
   setAttribute(".hero-visual img", "alt", hero.imageAlt);
   setText(".hero-visual figcaption span", hero.issue);
@@ -367,7 +408,10 @@ function applySections(sections = {}) {
   setText("#shop .section-heading p:not(.section-index)", sections.shopBody);
   setText("#collection .section-index", sections.collectionIndex);
   setText("#collection-title", sections.collectionTitle);
-  setText("#collection .section-heading p:not(.section-index)", sections.collectionBody);
+  setText(
+    "#collection .section-heading p:not(.section-index)",
+    sections.collectionBody,
+  );
   setText("#product-detail .section-index", sections.pdpIndex);
   setText("#music .section-index", sections.musicIndex);
   setText("#about .section-index", sections.aboutIndex);
@@ -389,7 +433,7 @@ function renderRoutes(routes = []) {
           <strong>${escapeHTML(route.title)}</strong>
           <em>${escapeHTML(route.body)}</em>
         </a>
-      `
+      `,
     )
     .join("");
 }
@@ -423,7 +467,11 @@ function renderFilters(productList) {
     return;
   }
 
-  const categories = [...new Map(productList.map((product) => [product.category, product.type])).entries()];
+  const categories = [
+    ...new Map(
+      productList.map((product) => [product.category, product.type]),
+    ).entries(),
+  ];
   const buttons = [["all", "All"], ...categories];
 
   toolbar.innerHTML = buttons
@@ -432,17 +480,23 @@ function renderFilters(productList) {
         <button class="filter-button ${index === 0 ? "is-active" : ""}" type="button" data-filter="${escapeHTML(category)}" data-hover>
           ${escapeHTML(label)}
         </button>
-      `
+      `,
     )
     .join("");
 }
 
 function renderProducts(productList = []) {
-  const normalized = productList.length ? productList.map(normalizeProduct) : Object.values(defaultProducts);
+  const normalized = productList.length
+    ? productList.map(normalizeProduct)
+    : Object.values(defaultProducts);
   const grid = document.querySelector(".product-grid");
 
-  products = Object.fromEntries(normalized.map((product) => [product.id, product]));
-  activeProductId = products[activeProductId] ? activeProductId : normalized[0]?.id || activeProductId;
+  products = Object.fromEntries(
+    normalized.map((product) => [product.id, product]),
+  );
+  activeProductId = products[activeProductId]
+    ? activeProductId
+    : normalized[0]?.id || activeProductId;
   renderFilters(normalized);
 
   if (!grid) {
@@ -474,7 +528,7 @@ function renderProducts(productList = []) {
             </div>
           </div>
         </article>
-      `
+      `,
     )
     .join("");
 }
@@ -492,7 +546,7 @@ function renderChapters(chapters = []) {
         .filter((id) => products[id])
         .map(
           (id) =>
-            `<button type="button" data-open-product data-product-id="${escapeHTML(id)}" data-hover data-cursor="inspect">${escapeHTML(products[id].title)}</button>`
+            `<button type="button" data-open-product data-product-id="${escapeHTML(id)}" data-hover data-cursor="inspect">${escapeHTML(products[id].title)}</button>`,
         )
         .join("");
 
@@ -524,7 +578,10 @@ function applyMusic(music = {}) {
   const links = document.querySelector(".stream-links");
   if (links && Array.isArray(music.links)) {
     links.innerHTML = music.links
-      .map((link) => `<a href="${escapeHTML(link.href || "#music")}" data-hover data-cursor="open">${escapeHTML(link.label)}</a>`)
+      .map(
+        (link) =>
+          `<a href="${escapeHTML(link.href || "#music")}" data-hover data-cursor="open">${escapeHTML(link.label)}</a>`,
+      )
       .join("");
   }
 }
@@ -555,7 +612,7 @@ function renderJournal(journal = {}) {
           <span>${escapeHTML(entry.label)}</span>
           <strong>${escapeHTML(entry.title)}</strong>
         </a>
-      `
+      `,
     )
     .join("");
 }
@@ -570,7 +627,8 @@ function updateCursor() {
 }
 
 function setCursorMode(target) {
-  const label = target.dataset.cursor || target.getAttribute("aria-label") || "";
+  const label =
+    target.dataset.cursor || target.getAttribute("aria-label") || "";
   cursorLabel.textContent = label;
   document.body.classList.add("cursor-hover");
   document.body.classList.toggle("cursor-labeled", Boolean(label));
@@ -582,7 +640,11 @@ function clearCursorMode() {
 }
 
 function enableCursor() {
-  if (!motionConfig.cursor || !window.matchMedia("(pointer: fine)").matches || reducedMotion) {
+  if (
+    !motionConfig.cursor ||
+    !window.matchMedia("(pointer: fine)").matches ||
+    reducedMotion
+  ) {
     document.body.classList.add("motion-no-cursor");
     return;
   }
@@ -623,7 +685,11 @@ function setupGate() {
 }
 
 function setupReveal() {
-  if (!motionConfig.reveals || !("IntersectionObserver" in window) || reducedMotion) {
+  if (
+    !motionConfig.reveals ||
+    !("IntersectionObserver" in window) ||
+    reducedMotion
+  ) {
     revealTargets.forEach((target) => target.classList.add("is-visible"));
     return;
   }
@@ -637,11 +703,14 @@ function setupReveal() {
         }
       });
     },
-    { threshold: 0.14 }
+    { threshold: 0.14 },
   );
 
   revealTargets.forEach((target, index) => {
-    target.style.setProperty("--reveal-delay", `${Math.min(index * 34, 170)}ms`);
+    target.style.setProperty(
+      "--reveal-delay",
+      `${Math.min(index * 34, 170)}ms`,
+    );
     observer.observe(target);
   });
 }
@@ -669,10 +738,15 @@ function setupNavState() {
     });
 
     navLinks.forEach((link) => {
-      link.classList.toggle("is-active", active && link.getAttribute("href") === `#${active.id}`);
+      link.classList.toggle(
+        "is-active",
+        active && link.getAttribute("href") === `#${active.id}`,
+      );
     });
 
-    const activeLink = [...navLinks].find((link) => link.classList.contains("is-active")) || navLinks[0];
+    const activeLink =
+      [...navLinks].find((link) => link.classList.contains("is-active")) ||
+      navLinks[0];
 
     if (nav && activeLink) {
       const navRect = nav.getBoundingClientRect();
@@ -697,9 +771,13 @@ function setupParallax() {
 
     parallaxTargets.forEach((target) => {
       const rect = target.getBoundingClientRect();
-      const progressValue = (rect.top + rect.height / 2 - viewportHeight / 2) / viewportHeight;
+      const progressValue =
+        (rect.top + rect.height / 2 - viewportHeight / 2) / viewportHeight;
       const depth = Number(target.dataset.depth || 18) * intensity;
-      const offset = Math.max(-Math.abs(depth), Math.min(Math.abs(depth), progressValue * -depth));
+      const offset = Math.max(
+        -Math.abs(depth),
+        Math.min(Math.abs(depth), progressValue * -depth),
+      );
       target.style.setProperty("--parallax-y", `${offset}px`);
     });
 
@@ -718,7 +796,12 @@ function setupParallax() {
 }
 
 function emitSpatialClick(event) {
-  if (!motionConfig.spatialClicks || reducedMotion || !event.clientX || !event.clientY) {
+  if (
+    !motionConfig.spatialClicks ||
+    reducedMotion ||
+    !event.clientX ||
+    !event.clientY
+  ) {
     return;
   }
 
@@ -756,7 +839,8 @@ function setupPageTransitions() {
   document.querySelectorAll('a[href^="#"]').forEach((link) => {
     link.addEventListener("click", (event) => {
       const hash = link.getAttribute("href");
-      const target = hash && hash.length > 1 ? document.querySelector(hash) : null;
+      const target =
+        hash && hash.length > 1 ? document.querySelector(hash) : null;
 
       if (!target) {
         return;
@@ -820,7 +904,9 @@ function updatePdp(productId, shouldScroll = true) {
   pdp.collection.textContent = product.collection;
 
   if (shouldScroll) {
-    document.querySelector("#product-detail").scrollIntoView({ behavior: "smooth", block: "start" });
+    document
+      .querySelector("#product-detail")
+      .scrollIntoView({ behavior: "smooth", block: "start" });
   }
 }
 
@@ -866,7 +952,10 @@ function addToCart(productId) {
 
 function renderCart() {
   const totalQuantity = cart.reduce((sum, item) => sum + item.quantity, 0);
-  const totalPrice = cart.reduce((sum, item) => sum + item.quantity * item.price, 0);
+  const totalPrice = cart.reduce(
+    (sum, item) => sum + item.quantity * item.price,
+    0,
+  );
 
   cartCount.textContent = totalQuantity;
   cartTotal.textContent = formatPrice(totalPrice);
@@ -888,7 +977,7 @@ function renderCart() {
           </div>
           <span class="line-price">${formatPrice(item.price * item.quantity)}</span>
         </article>
-      `
+      `,
     )
     .join("");
 
@@ -953,9 +1042,15 @@ function setupCart() {
 function setupMusicPlayer() {
   playButton.addEventListener("click", () => {
     player.classList.toggle("is-playing");
-    musicRoom.classList.toggle("is-playing", player.classList.contains("is-playing"));
+    musicRoom.classList.toggle(
+      "is-playing",
+      player.classList.contains("is-playing"),
+    );
 
-    if (player.classList.contains("is-playing") && motionConfig.musicVisualizer) {
+    if (
+      player.classList.contains("is-playing") &&
+      motionConfig.musicVisualizer
+    ) {
       window.clearInterval(progressTimer);
       progressTimer = window.setInterval(() => {
         progress = progress >= 100 ? 0 : progress + 1;
