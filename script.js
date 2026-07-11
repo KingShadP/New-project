@@ -729,35 +729,63 @@ function setupNavState() {
     .map((link) => document.querySelector(link.getAttribute("href")))
     .filter(Boolean);
 
+  let currentActiveId = null;
+  let scrollFrame = null;
+
   const updateNav = () => {
+    const scrollY = window.scrollY;
     let active = sections[0];
     sections.forEach((section) => {
-      if (section.offsetTop - 130 <= window.scrollY) {
+      if (section.offsetTop - 130 <= scrollY) {
         active = section;
       }
     });
 
-    navLinks.forEach((link) => {
-      link.classList.toggle(
-        "is-active",
-        active && link.getAttribute("href") === `#${active.id}`,
-      );
-    });
+    const newActiveId = active ? active.id : null;
 
-    const activeLink =
-      [...navLinks].find((link) => link.classList.contains("is-active")) ||
-      navLinks[0];
+    // Skip expensive DOM reads/writes if the section hasn't changed
+    if (newActiveId !== currentActiveId) {
+      currentActiveId = newActiveId;
 
-    if (nav && activeLink) {
-      const navRect = nav.getBoundingClientRect();
-      const linkRect = activeLink.getBoundingClientRect();
-      nav.style.setProperty("--nav-x", `${linkRect.left - navRect.left}px`);
-      nav.style.setProperty("--nav-w", `${linkRect.width}px`);
+      navLinks.forEach((link) => {
+        link.classList.toggle(
+          "is-active",
+          active && link.getAttribute("href") === `#${active.id}`,
+        );
+      });
+
+      const activeLink =
+        [...navLinks].find((link) => link.classList.contains("is-active")) ||
+        navLinks[0];
+
+      if (nav && activeLink) {
+        // These are expensive forced layouts
+        const navRect = nav.getBoundingClientRect();
+        const linkRect = activeLink.getBoundingClientRect();
+        nav.style.setProperty("--nav-x", `${linkRect.left - navRect.left}px`);
+        nav.style.setProperty("--nav-w", `${linkRect.width}px`);
+      }
+    }
+
+    scrollFrame = null;
+  };
+
+  const requestNavUpdate = () => {
+    if (!scrollFrame) {
+      scrollFrame = requestAnimationFrame(updateNav);
     }
   };
 
   updateNav();
-  window.addEventListener("scroll", updateNav, { passive: true });
+  window.addEventListener("scroll", requestNavUpdate, { passive: true });
+  window.addEventListener(
+    "resize",
+    () => {
+      currentActiveId = null; // Force recalculation of rects on resize
+      requestNavUpdate();
+    },
+    { passive: true },
+  );
 }
 
 function setupParallax() {
