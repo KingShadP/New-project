@@ -8,15 +8,22 @@ function isProduction() {
 }
 
 function getConfig() {
-  const password = process.env.KSP_ADMIN_PASSWORD || (!isProduction() ? "admin" : "");
-  const secret = process.env.KSP_ADMIN_SECRET || (!isProduction() ? "dev-only-kingshadp-secret" : "");
+  const password =
+    process.env.KSP_ADMIN_PASSWORD || (!isProduction() ? "admin" : "");
+  const secret =
+    process.env.KSP_ADMIN_SECRET ||
+    (!isProduction() ? "dev-only-kingshadp-secret" : "");
 
   return {
     password,
     secret,
     configured: Boolean(password && secret),
-    productionConfigured: Boolean(process.env.KSP_ADMIN_PASSWORD && process.env.KSP_ADMIN_SECRET),
-    usesDevelopmentFallback: !isProduction() && (!process.env.KSP_ADMIN_PASSWORD || !process.env.KSP_ADMIN_SECRET),
+    productionConfigured: Boolean(
+      process.env.KSP_ADMIN_PASSWORD && process.env.KSP_ADMIN_SECRET,
+    ),
+    usesDevelopmentFallback:
+      !isProduction() &&
+      (!process.env.KSP_ADMIN_PASSWORD || !process.env.KSP_ADMIN_SECRET),
   };
 }
 
@@ -41,17 +48,19 @@ function safeEqual(left, right) {
 
 function parseCookies(req) {
   const header = req.headers.cookie || "";
+  if (!header) return {};
 
-  return Object.fromEntries(
-    header
-      .split(";")
-      .map((part) => part.trim())
-      .filter(Boolean)
-      .map((part) => {
-        const index = part.indexOf("=");
-        return [decodeURIComponent(part.slice(0, index)), decodeURIComponent(part.slice(index + 1))];
-      })
-  );
+  return header.split(";").reduce((acc, part) => {
+    part = part.trim();
+    if (part) {
+      const index = part.indexOf("=");
+      // Preserve existing exact behavior when index is -1
+      acc[decodeURIComponent(part.slice(0, index))] = decodeURIComponent(
+        part.slice(index + 1),
+      );
+    }
+    return acc;
+  }, {});
 }
 
 function createSessionCookie() {
@@ -83,7 +92,9 @@ function verifySession(req) {
   }
 
   try {
-    const parsed = JSON.parse(Buffer.from(payload, "base64url").toString("utf8"));
+    const parsed = JSON.parse(
+      Buffer.from(payload, "base64url").toString("utf8"),
+    );
     const ageSeconds = (Date.now() - Number(parsed.iat || 0)) / 1000;
     return parsed.role === "admin" && ageSeconds < SESSION_SECONDS;
   } catch {
@@ -102,13 +113,18 @@ function requireAdmin(req, res, sendJson) {
     sendJson(res, 503, {
       ok: false,
       configured: false,
-      message: "Admin is locked until KSP_ADMIN_PASSWORD and KSP_ADMIN_SECRET are configured.",
+      message:
+        "Admin is locked until KSP_ADMIN_PASSWORD and KSP_ADMIN_SECRET are configured.",
     });
     return false;
   }
 
   if (!verifySession(req)) {
-    sendJson(res, 401, { ok: false, authenticated: false, message: "Admin session required." });
+    sendJson(res, 401, {
+      ok: false,
+      authenticated: false,
+      message: "Admin session required.",
+    });
     return false;
   }
 
