@@ -806,8 +806,13 @@ function setupParallax() {
     const viewportHeight = window.innerHeight;
     const intensity = Number(motionConfig.intensity ?? 1);
 
+    // ⚡ Bolt: Batch DOM reads to prevent layout thrashing
+    const parallaxData = [];
     parallaxTargets.forEach((target) => {
       const rect = target.getBoundingClientRect();
+      // Skip elements outside the viewport
+      if (rect.bottom < 0 || rect.top > viewportHeight) return;
+
       const progressValue =
         (rect.top + rect.height / 2 - viewportHeight / 2) / viewportHeight;
       const depth = Number(target.dataset.depth || 18) * intensity;
@@ -815,6 +820,12 @@ function setupParallax() {
         -Math.abs(depth),
         Math.min(Math.abs(depth), progressValue * -depth),
       );
+
+      parallaxData.push({ target, offset });
+    });
+
+    // ⚡ Bolt: Batch DOM writes separately
+    parallaxData.forEach(({ target, offset }) => {
       target.style.setProperty("--parallax-y", `${offset}px`);
     });
 
