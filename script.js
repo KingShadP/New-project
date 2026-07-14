@@ -806,7 +806,8 @@ function setupParallax() {
     const viewportHeight = window.innerHeight;
     const intensity = Number(motionConfig.intensity ?? 1);
 
-    parallaxTargets.forEach((target) => {
+    // Batch reads
+    const updates = Array.from(parallaxTargets).map((target) => {
       const rect = target.getBoundingClientRect();
       const progressValue =
         (rect.top + rect.height / 2 - viewportHeight / 2) / viewportHeight;
@@ -815,6 +816,11 @@ function setupParallax() {
         -Math.abs(depth),
         Math.min(Math.abs(depth), progressValue * -depth),
       );
+      return { target, offset };
+    });
+
+    // Batch writes
+    updates.forEach(({ target, offset }) => {
       target.style.setProperty("--parallax-y", `${offset}px`);
     });
 
