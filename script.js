@@ -735,24 +735,53 @@ function setupHeader() {
 
 function setupNavState() {
   const sections = [...navLinks]
-    .map((link) => document.querySelector(link.getAttribute("href")))
+    .map((link) => {
+      const el = document.querySelector(link.getAttribute("href"));
+      return el ? { el, link } : null;
+    })
     .filter(Boolean);
 
   let currentActiveId = null;
   let scrollFrame = null;
+  let cachedSections = [];
+  let navRectLeft = 0;
+  let linkRects = {};
+
+  // ⚡ Bolt: Cache absolute layout positions on load/resize to completely eliminate
+  // expensive getBoundingClientRect() and offsetTop reads from the scroll loop.
+  const cacheLayout = () => {
+    cachedSections = sections.map(({ el, link }) => ({
+      id: el.id,
+      top: el.offsetTop,
+      href: link.getAttribute("href"),
+    }));
+
+    if (nav) {
+      navRectLeft = nav.getBoundingClientRect().left;
+      navLinks.forEach((link) => {
+        const rect = link.getBoundingClientRect();
+        linkRects[link.getAttribute("href")] = {
+          left: rect.left,
+          width: rect.width,
+        };
+      });
+    }
+  };
+
+  cacheLayout();
 
   const updateNav = () => {
     const scrollY = window.scrollY;
-    let active = sections[0];
-    sections.forEach((section) => {
-      if (section.offsetTop - 130 <= scrollY) {
+    let active = cachedSections[0];
+
+    cachedSections.forEach((section) => {
+      if (section.top - 130 <= scrollY) {
         active = section;
       }
     });
 
     const newActiveId = active ? active.id : null;
 
-    // Skip expensive DOM reads/writes if the section hasn't changed
     if (newActiveId !== currentActiveId) {
       currentActiveId = newActiveId;
 
@@ -763,16 +792,14 @@ function setupNavState() {
         );
       });
 
-      const activeLink =
-        [...navLinks].find((link) => link.classList.contains("is-active")) ||
-        navLinks[0];
+      const activeHref = active
+        ? `#${active.id}`
+        : navLinks[0].getAttribute("href");
 
-      if (nav && activeLink) {
-        // These are expensive forced layouts
-        const navRect = nav.getBoundingClientRect();
-        const linkRect = activeLink.getBoundingClientRect();
-        nav.style.setProperty("--nav-x", `${linkRect.left - navRect.left}px`);
-        nav.style.setProperty("--nav-w", `${linkRect.width}px`);
+      if (nav && linkRects[activeHref]) {
+        const linkMetrics = linkRects[activeHref];
+        nav.style.setProperty("--nav-x", `${linkMetrics.left - navRectLeft}px`);
+        nav.style.setProperty("--nav-w", `${linkMetrics.width}px`);
       }
     }
 
@@ -790,7 +817,8 @@ function setupNavState() {
   window.addEventListener(
     "resize",
     () => {
-      currentActiveId = null; // Force recalculation of rects on resize
+      currentActiveId = null;
+      cacheLayout();
       requestNavUpdate();
     },
     { passive: true },
@@ -802,24 +830,44 @@ function setupParallax() {
     return;
   }
 
-  const updateParallax = () => {
-    const viewportHeight = window.innerHeight;
-    const intensity = Number(motionConfig.intensity ?? 1);
+  let cachedParallax = [];
+  let viewportHeight = window.innerHeight;
 
-    // Batch reads
-    const updates = Array.from(parallaxTargets).map((target) => {
+  const cacheLayout = () => {
+    viewportHeight = window.innerHeight;
+    cachedParallax = Array.from(parallaxTargets).map((target) => {
       const rect = target.getBoundingClientRect();
-      const progressValue =
-        (rect.top + rect.height / 2 - viewportHeight / 2) / viewportHeight;
-      const depth = Number(target.dataset.depth || 18) * intensity;
-      const offset = Math.max(
-        -Math.abs(depth),
-        Math.min(Math.abs(depth), progressValue * -depth),
-      );
-      return { target, offset };
+      return {
+        target,
+        documentTop: rect.top + window.scrollY,
+        height: rect.height,
+        depth: Number(target.dataset.depth || 18),
+      };
     });
+  };
 
-    // Batch writes
+  cacheLayout();
+
+  // ⚡ Bolt: Only perform fast relative math against window.scrollY inside the rAF loop.
+  // This eliminates forced synchronous layouts (thrashing) when combined with DOM writes.
+  const updateParallax = () => {
+    const intensity = Number(motionConfig.intensity ?? 1);
+    const currentScrollY = window.scrollY;
+
+    const updates = cachedParallax.map(
+      ({ target, documentTop, height, depth }) => {
+        const relativeTop = documentTop - currentScrollY;
+        const progressValue =
+          (relativeTop + height / 2 - viewportHeight / 2) / viewportHeight;
+        const effectiveDepth = depth * intensity;
+        const offset = Math.max(
+          -Math.abs(effectiveDepth),
+          Math.min(Math.abs(effectiveDepth), progressValue * -effectiveDepth),
+        );
+        return { target, offset };
+      },
+    );
+
     updates.forEach(({ target, offset }) => {
       target.style.setProperty("--parallax-y", `${offset}px`);
     });
@@ -835,7 +883,14 @@ function setupParallax() {
 
   updateParallax();
   window.addEventListener("scroll", requestParallax, { passive: true });
-  window.addEventListener("resize", requestParallax);
+  window.addEventListener(
+    "resize",
+    () => {
+      cacheLayout();
+      requestParallax();
+    },
+    { passive: true },
+  );
 }
 
 function emitSpatialClick(event) {
