@@ -166,13 +166,6 @@ function escapeHTML(value) {
     .replace(/'/g, "&#039;");
 }
 
-function slugify(value) {
-  return String(value || "item")
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/(^-|-$)/g, "");
-}
-
 function formatPrice(value) {
   const number = Number(value) || 0;
   return Number.isInteger(number) ? `$${number}` : `$${number.toFixed(2)}`;

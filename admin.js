@@ -78,13 +78,6 @@ function setPath(path, value) {
   target[last] = value;
 }
 
-function slugify(value) {
-  return String(value || "item")
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/(^-|-$)/g, "");
-}
-
 function showView(name) {
   Object.entries(views).forEach(([key, node]) => {
     node.hidden = key !== name;
