@@ -4,3 +4,6 @@
 ## 2024-05-24 - Layout Thrashing inside requestAnimationFrame
 **Learning:** Even when scroll handlers are wrapped in `requestAnimationFrame`, performing a DOM read (`getBoundingClientRect`) followed immediately by a DOM write (`style.setProperty`) inside a loop (like `forEach` over parallax targets) causes layout thrashing. The write dirties the layout, and the read on the next iteration forces a recalculation, destroying performance.
 **Action:** Always strictly separate DOM reads from DOM writes into two separate batches (loops). Read all necessary layout information first into an array or object, and only then perform all necessary DOM writes in a second pass.
+## 2024-05-24 - Caching layout metrics on resize to avoid scroll thrashing
+**Learning:** Even when reads and writes are batched, performing DOM reads like `getBoundingClientRect()` inside a `requestAnimationFrame` loop on scroll is expensive.
+**Action:** Cache these layout metrics (`initialTop`, `height`, `offsetTop`) during initialization and on the `resize` event. Then, inside the scroll handler, use arithmetic with `window.scrollY` to calculate new positions, completely avoiding DOM reads during scroll.

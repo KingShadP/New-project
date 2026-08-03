@@ -740,13 +740,24 @@ function setupNavState() {
 
   let currentActiveId = null;
   let scrollFrame = null;
+  let sectionOffsets = [];
+
+  const calculateOffsets = () => {
+    sectionOffsets = Array.from(sections).map((section) => ({
+      id: section.id,
+      offsetTop: section.offsetTop,
+      element: section,
+    }));
+  };
+
+  calculateOffsets();
 
   const updateNav = () => {
     const scrollY = window.scrollY;
-    let active = sections[0];
-    sections.forEach((section) => {
+    let active = sectionOffsets[0]?.element;
+    sectionOffsets.forEach((section) => {
       if (section.offsetTop - 130 <= scrollY) {
-        active = section;
+        active = section.element;
       }
     });
 
@@ -790,6 +801,7 @@ function setupNavState() {
   window.addEventListener(
     "resize",
     () => {
+      calculateOffsets();
       currentActiveId = null; // Force recalculation of rects on resize
       requestNavUpdate();
     },
@@ -802,21 +814,39 @@ function setupParallax() {
     return;
   }
 
-  const updateParallax = () => {
-    const viewportHeight = window.innerHeight;
-    const intensity = Number(motionConfig.intensity ?? 1);
+  let targetMetrics = [];
+  let viewportHeight = window.innerHeight;
 
-    // Batch reads
-    const updates = Array.from(parallaxTargets).map((target) => {
+  const calculateMetrics = () => {
+    viewportHeight = window.innerHeight;
+    targetMetrics = Array.from(parallaxTargets).map((target) => {
       const rect = target.getBoundingClientRect();
+      return {
+        target,
+        depth: Number(target.dataset.depth || 18),
+        initialTop: rect.top + window.scrollY,
+        height: rect.height,
+      };
+    });
+  };
+
+  calculateMetrics();
+
+  const updateParallax = () => {
+    const intensity = Number(motionConfig.intensity ?? 1);
+    const scrollY = window.scrollY;
+
+    // Batch math (no DOM reads here!)
+    const updates = targetMetrics.map((metric) => {
+      const currentTop = metric.initialTop - scrollY;
       const progressValue =
-        (rect.top + rect.height / 2 - viewportHeight / 2) / viewportHeight;
-      const depth = Number(target.dataset.depth || 18) * intensity;
+        (currentTop + metric.height / 2 - viewportHeight / 2) / viewportHeight;
+      const depth = metric.depth * intensity;
       const offset = Math.max(
         -Math.abs(depth),
         Math.min(Math.abs(depth), progressValue * -depth),
       );
-      return { target, offset };
+      return { target: metric.target, offset };
     });
 
     // Batch writes
@@ -835,7 +865,14 @@ function setupParallax() {
 
   updateParallax();
   window.addEventListener("scroll", requestParallax, { passive: true });
-  window.addEventListener("resize", requestParallax);
+  window.addEventListener(
+    "resize",
+    () => {
+      calculateMetrics();
+      requestParallax();
+    },
+    { passive: true },
+  );
 }
 
 function emitSpatialClick(event) {
