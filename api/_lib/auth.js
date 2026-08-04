@@ -119,6 +119,7 @@ module.exports = {
   clearSessionCookie,
   createSessionCookie,
   getConfig,
+  parseCookies,
   requireAdmin,
   safeEqual,
   verifySession,
