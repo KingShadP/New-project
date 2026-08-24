@@ -740,39 +740,62 @@ function setupNavState() {
 
   let currentActiveId = null;
   let scrollFrame = null;
+  let sectionMetrics = [];
+  let linkMetrics = new Map();
+
+  const cacheMetrics = () => {
+    const navRect = nav ? nav.getBoundingClientRect() : { left: 0 };
+
+    sectionMetrics = Array.from(sections).map((section) => ({
+      id: section.id,
+      offsetTop: section.offsetTop,
+      section,
+    }));
+
+    navLinks.forEach((link) => {
+      const href = link.getAttribute("href");
+      if (href && href.startsWith("#")) {
+        const id = href.substring(1);
+        const linkRect = link.getBoundingClientRect();
+        linkMetrics.set(id, {
+          left: linkRect.left - navRect.left,
+          width: linkRect.width,
+        });
+      }
+    });
+  };
 
   const updateNav = () => {
     const scrollY = window.scrollY;
-    let active = sections[0];
-    sections.forEach((section) => {
-      if (section.offsetTop - 130 <= scrollY) {
-        active = section;
+    let activeId = sectionMetrics.length ? sectionMetrics[0].id : null;
+
+    sectionMetrics.forEach((metric) => {
+      if (metric.offsetTop - 130 <= scrollY) {
+        activeId = metric.id;
       }
     });
 
-    const newActiveId = active ? active.id : null;
-
     // Skip expensive DOM reads/writes if the section hasn't changed
-    if (newActiveId !== currentActiveId) {
-      currentActiveId = newActiveId;
+    if (activeId !== currentActiveId) {
+      currentActiveId = activeId;
 
       navLinks.forEach((link) => {
         link.classList.toggle(
           "is-active",
-          active && link.getAttribute("href") === `#${active.id}`,
+          activeId && link.getAttribute("href") === `#${activeId}`,
         );
       });
 
-      const activeLink =
-        [...navLinks].find((link) => link.classList.contains("is-active")) ||
-        navLinks[0];
-
-      if (nav && activeLink) {
-        // These are expensive forced layouts
-        const navRect = nav.getBoundingClientRect();
-        const linkRect = activeLink.getBoundingClientRect();
-        nav.style.setProperty("--nav-x", `${linkRect.left - navRect.left}px`);
-        nav.style.setProperty("--nav-w", `${linkRect.width}px`);
+      if (nav) {
+        let metrics = activeId ? linkMetrics.get(activeId) : null;
+        if (!metrics && navLinks.length > 0) {
+          const firstHref = navLinks[0].getAttribute("href")?.substring(1);
+          metrics = linkMetrics.get(firstHref);
+        }
+        if (metrics) {
+          nav.style.setProperty("--nav-x", `${metrics.left}px`);
+          nav.style.setProperty("--nav-w", `${metrics.width}px`);
+        }
       }
     }
 
@@ -785,12 +808,14 @@ function setupNavState() {
     }
   };
 
+  cacheMetrics();
   updateNav();
   window.addEventListener("scroll", requestNavUpdate, { passive: true });
   window.addEventListener(
     "resize",
     () => {
       currentActiveId = null; // Force recalculation of rects on resize
+      cacheMetrics();
       requestNavUpdate();
     },
     { passive: true },
@@ -802,21 +827,43 @@ function setupParallax() {
     return;
   }
 
-  const updateParallax = () => {
-    const viewportHeight = window.innerHeight;
-    const intensity = Number(motionConfig.intensity ?? 1);
+  let metrics = [];
+  let viewportHeight = window.innerHeight;
 
-    // Batch reads
-    const updates = Array.from(parallaxTargets).map((target) => {
+  const cacheMetrics = () => {
+    viewportHeight = window.innerHeight;
+
+    // Clear transforms to get accurate un-transformed positions
+    Array.from(parallaxTargets).forEach((target) => {
+      target.style.removeProperty("--parallax-y");
+    });
+
+    metrics = Array.from(parallaxTargets).map((target) => {
       const rect = target.getBoundingClientRect();
+      return {
+        target,
+        documentTop: rect.top + window.scrollY,
+        height: rect.height,
+        depth: Number(target.dataset.depth || 18),
+      };
+    });
+  };
+
+  const updateParallax = () => {
+    const intensity = Number(motionConfig.intensity ?? 1);
+    const scrollY = window.scrollY;
+
+    // Batch reads / calculation
+    const updates = metrics.map((metric) => {
+      const top = metric.documentTop - scrollY;
       const progressValue =
-        (rect.top + rect.height / 2 - viewportHeight / 2) / viewportHeight;
-      const depth = Number(target.dataset.depth || 18) * intensity;
+        (top + metric.height / 2 - viewportHeight / 2) / viewportHeight;
+      const depth = metric.depth * intensity;
       const offset = Math.max(
         -Math.abs(depth),
         Math.min(Math.abs(depth), progressValue * -depth),
       );
-      return { target, offset };
+      return { target: metric.target, offset };
     });
 
     // Batch writes
@@ -833,9 +880,17 @@ function setupParallax() {
     }
   };
 
+  cacheMetrics();
   updateParallax();
   window.addEventListener("scroll", requestParallax, { passive: true });
-  window.addEventListener("resize", requestParallax);
+  window.addEventListener(
+    "resize",
+    () => {
+      cacheMetrics();
+      requestParallax();
+    },
+    { passive: true },
+  );
 }
 
 function emitSpatialClick(event) {
