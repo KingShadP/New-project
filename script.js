@@ -802,24 +802,50 @@ function setupParallax() {
     return;
   }
 
+  let cachedMetrics = [];
+
+  const cacheMetrics = () => {
+    // Batch write: clear transforms first to avoid layout thrashing
+    parallaxTargets.forEach((target) => {
+      target.style.removeProperty("--parallax-y");
+    });
+
+    // Batch read: measure layouts
+    cachedMetrics = Array.from(parallaxTargets).map((target) => {
+      const rect = target.getBoundingClientRect();
+      const initialScrollY = window.scrollY;
+
+      // Store absolute document top instead of relative viewport top
+      return {
+        target,
+        absoluteTop: rect.top + initialScrollY,
+        height: rect.height,
+        depth: Number(target.dataset.depth || 18),
+      };
+    });
+  };
+
   const updateParallax = () => {
     const viewportHeight = window.innerHeight;
     const intensity = Number(motionConfig.intensity ?? 1);
+    const scrollY = window.scrollY;
 
-    // Batch reads
-    const updates = Array.from(parallaxTargets).map((target) => {
-      const rect = target.getBoundingClientRect();
+    const updates = cachedMetrics.map((metric) => {
+      // Calculate where the element's top is relative to current viewport
+      const relativeTop = metric.absoluteTop - scrollY;
+
       const progressValue =
-        (rect.top + rect.height / 2 - viewportHeight / 2) / viewportHeight;
-      const depth = Number(target.dataset.depth || 18) * intensity;
+        (relativeTop + metric.height / 2 - viewportHeight / 2) / viewportHeight;
+
+      const depth = metric.depth * intensity;
       const offset = Math.max(
         -Math.abs(depth),
         Math.min(Math.abs(depth), progressValue * -depth),
       );
-      return { target, offset };
+
+      return { target: metric.target, offset };
     });
 
-    // Batch writes
     updates.forEach(({ target, offset }) => {
       target.style.setProperty("--parallax-y", `${offset}px`);
     });
@@ -833,9 +859,18 @@ function setupParallax() {
     }
   };
 
+  cacheMetrics();
   updateParallax();
+
   window.addEventListener("scroll", requestParallax, { passive: true });
-  window.addEventListener("resize", requestParallax);
+  window.addEventListener(
+    "resize",
+    () => {
+      cacheMetrics();
+      requestParallax();
+    },
+    { passive: true },
+  );
 }
 
 function emitSpatialClick(event) {
