@@ -740,13 +740,30 @@ function setupNavState() {
 
   let currentActiveId = null;
   let scrollFrame = null;
+  let sectionMetrics = [];
+  let navRect = null;
+  let linkRects = new Map();
+
+  const cacheMetrics = () => {
+    sectionMetrics = Array.from(sections).map((section) => ({
+      id: section.id,
+      offsetTop: section.offsetTop,
+    }));
+
+    if (nav) {
+      navRect = nav.getBoundingClientRect();
+      navLinks.forEach((link) => {
+        linkRects.set(link, link.getBoundingClientRect());
+      });
+    }
+  };
 
   const updateNav = () => {
     const scrollY = window.scrollY;
     let active = sections[0];
-    sections.forEach((section) => {
-      if (section.offsetTop - 130 <= scrollY) {
-        active = section;
+    sectionMetrics.forEach((metric, index) => {
+      if (metric.offsetTop - 130 <= scrollY) {
+        active = sections[index];
       }
     });
 
@@ -767,10 +784,8 @@ function setupNavState() {
         [...navLinks].find((link) => link.classList.contains("is-active")) ||
         navLinks[0];
 
-      if (nav && activeLink) {
-        // These are expensive forced layouts
-        const navRect = nav.getBoundingClientRect();
-        const linkRect = activeLink.getBoundingClientRect();
+      if (nav && activeLink && navRect && linkRects.has(activeLink)) {
+        const linkRect = linkRects.get(activeLink);
         nav.style.setProperty("--nav-x", `${linkRect.left - navRect.left}px`);
         nav.style.setProperty("--nav-w", `${linkRect.width}px`);
       }
@@ -785,11 +800,13 @@ function setupNavState() {
     }
   };
 
+  cacheMetrics();
   updateNav();
   window.addEventListener("scroll", requestNavUpdate, { passive: true });
   window.addEventListener(
     "resize",
     () => {
+      cacheMetrics();
       currentActiveId = null; // Force recalculation of rects on resize
       requestNavUpdate();
     },
@@ -802,22 +819,45 @@ function setupParallax() {
     return;
   }
 
+  let cachedTargets = [];
+
+  const cacheMetrics = () => {
+    // Clear styles (writes) to get un-transformed metrics
+    Array.from(parallaxTargets).forEach((target) => {
+      target.style.removeProperty("--parallax-y");
+    });
+
+    // Batch reads
+    cachedTargets = Array.from(parallaxTargets).map((target) => {
+      const rect = target.getBoundingClientRect();
+      return {
+        target,
+        absoluteTop: rect.top + window.scrollY,
+        height: rect.height,
+        depth: Number(target.dataset.depth || 18),
+      };
+    });
+  };
+
   const updateParallax = () => {
     const viewportHeight = window.innerHeight;
     const intensity = Number(motionConfig.intensity ?? 1);
+    const scrollY = window.scrollY;
 
-    // Batch reads
-    const updates = Array.from(parallaxTargets).map((target) => {
-      const rect = target.getBoundingClientRect();
-      const progressValue =
-        (rect.top + rect.height / 2 - viewportHeight / 2) / viewportHeight;
-      const depth = Number(target.dataset.depth || 18) * intensity;
-      const offset = Math.max(
-        -Math.abs(depth),
-        Math.min(Math.abs(depth), progressValue * -depth),
-      );
-      return { target, offset };
-    });
+    // Calculate offsets based on cached metrics (No DOM reads)
+    const updates = cachedTargets.map(
+      ({ target, absoluteTop, height, depth }) => {
+        const rectTop = absoluteTop - scrollY;
+        const progressValue =
+          (rectTop + height / 2 - viewportHeight / 2) / viewportHeight;
+        const scaledDepth = depth * intensity;
+        const offset = Math.max(
+          -Math.abs(scaledDepth),
+          Math.min(Math.abs(scaledDepth), progressValue * -scaledDepth),
+        );
+        return { target, offset };
+      },
+    );
 
     // Batch writes
     updates.forEach(({ target, offset }) => {
@@ -833,9 +873,13 @@ function setupParallax() {
     }
   };
 
+  cacheMetrics();
   updateParallax();
   window.addEventListener("scroll", requestParallax, { passive: true });
-  window.addEventListener("resize", requestParallax);
+  window.addEventListener("resize", () => {
+    cacheMetrics();
+    requestParallax();
+  });
 }
 
 function emitSpatialClick(event) {
