@@ -740,13 +740,25 @@ function setupNavState() {
 
   let currentActiveId = null;
   let scrollFrame = null;
+  let sectionOffsets = [];
+
+  const cacheOffsets = () => {
+    sectionOffsets = Array.from(sections).map((section) => ({
+      id: section.id,
+      offsetTop: section.offsetTop,
+      element: section,
+    }));
+  };
+
+  cacheOffsets();
 
   const updateNav = () => {
     const scrollY = window.scrollY;
-    let active = sections[0];
-    sections.forEach((section) => {
-      if (section.offsetTop - 130 <= scrollY) {
-        active = section;
+    let active = sectionOffsets[0]?.element || sections[0];
+
+    sectionOffsets.forEach((sectionCache) => {
+      if (sectionCache.offsetTop - 130 <= scrollY) {
+        active = sectionCache.element;
       }
     });
 
@@ -790,6 +802,7 @@ function setupNavState() {
   window.addEventListener(
     "resize",
     () => {
+      cacheOffsets();
       currentActiveId = null; // Force recalculation of rects on resize
       requestNavUpdate();
     },
@@ -802,15 +815,41 @@ function setupParallax() {
     return;
   }
 
-  const updateParallax = () => {
-    const viewportHeight = window.innerHeight;
-    const intensity = Number(motionConfig.intensity ?? 1);
+  let cachedParallax = [];
+  let viewportHeight = window.innerHeight;
 
-    // Batch reads
-    const updates = Array.from(parallaxTargets).map((target) => {
+  const cacheParallaxTargets = () => {
+    viewportHeight = window.innerHeight;
+
+    // Temporarily clear transforms to get un-transformed positions
+    Array.from(parallaxTargets).forEach((target) => {
+      target.style.removeProperty("--parallax-y");
+    });
+
+    cachedParallax = Array.from(parallaxTargets).map((target) => {
       const rect = target.getBoundingClientRect();
+      // Calculate top position relative to document top so scrollY can be used
+      const absoluteTop = rect.top + window.scrollY;
+      const centerY = absoluteTop + rect.height / 2;
+      return { target, centerY };
+    });
+
+    // We don't need to reapply --parallax-y here; updateParallax will do it immediately
+  };
+
+  const updateParallax = () => {
+    const intensity = Number(motionConfig.intensity ?? 1);
+    const scrollY = window.scrollY;
+
+    // No DOM reads here, just calculation
+    const updates = cachedParallax.map(({ target, centerY }) => {
+      // Calculate the progress based on cached un-transformed position and current scroll
+      // A positive progressValue means the element is below the center of the viewport
+      const currentElementCenterRelativeToViewport = centerY - scrollY;
       const progressValue =
-        (rect.top + rect.height / 2 - viewportHeight / 2) / viewportHeight;
+        (currentElementCenterRelativeToViewport - viewportHeight / 2) /
+        viewportHeight;
+
       const depth = Number(target.dataset.depth || 18) * intensity;
       const offset = Math.max(
         -Math.abs(depth),
@@ -833,9 +872,18 @@ function setupParallax() {
     }
   };
 
+  cacheParallaxTargets();
   updateParallax();
+
   window.addEventListener("scroll", requestParallax, { passive: true });
-  window.addEventListener("resize", requestParallax);
+  window.addEventListener(
+    "resize",
+    () => {
+      cacheParallaxTargets();
+      requestParallax();
+    },
+    { passive: true },
+  );
 }
 
 function emitSpatialClick(event) {
