@@ -740,13 +740,23 @@ function setupNavState() {
 
   let currentActiveId = null;
   let scrollFrame = null;
+  let sectionMetrics = [];
+
+  const updateMetrics = () => {
+    sectionMetrics = Array.from(sections).map((section) => ({
+      id: section.id,
+      offsetTop: section.offsetTop,
+      element: section,
+    }));
+  };
 
   const updateNav = () => {
     const scrollY = window.scrollY;
-    let active = sections[0];
-    sections.forEach((section) => {
-      if (section.offsetTop - 130 <= scrollY) {
-        active = section;
+    let active = sectionMetrics[0]?.element;
+
+    sectionMetrics.forEach((metric) => {
+      if (metric.offsetTop - 130 <= scrollY) {
+        active = metric.element;
       }
     });
 
@@ -785,11 +795,13 @@ function setupNavState() {
     }
   };
 
+  updateMetrics();
   updateNav();
   window.addEventListener("scroll", requestNavUpdate, { passive: true });
   window.addEventListener(
     "resize",
     () => {
+      updateMetrics();
       currentActiveId = null; // Force recalculation of rects on resize
       requestNavUpdate();
     },
@@ -802,22 +814,46 @@ function setupParallax() {
     return;
   }
 
+  let cachedMetrics = [];
+
+  const cacheMetrics = () => {
+    const scrollY = window.scrollY;
+
+    // Clear transforms to get accurate un-transformed positions
+    Array.from(parallaxTargets).forEach((target) => {
+      target.style.removeProperty("--parallax-y");
+    });
+
+    // Batch reads
+    cachedMetrics = Array.from(parallaxTargets).map((target) => {
+      const rect = target.getBoundingClientRect();
+      return {
+        target,
+        initialTop: rect.top + scrollY,
+        height: rect.height,
+        depth: Number(target.dataset.depth || 18),
+      };
+    });
+  };
+
   const updateParallax = () => {
     const viewportHeight = window.innerHeight;
     const intensity = Number(motionConfig.intensity ?? 1);
+    const scrollY = window.scrollY;
 
-    // Batch reads
-    const updates = Array.from(parallaxTargets).map((target) => {
-      const rect = target.getBoundingClientRect();
-      const progressValue =
-        (rect.top + rect.height / 2 - viewportHeight / 2) / viewportHeight;
-      const depth = Number(target.dataset.depth || 18) * intensity;
-      const offset = Math.max(
-        -Math.abs(depth),
-        Math.min(Math.abs(depth), progressValue * -depth),
-      );
-      return { target, offset };
-    });
+    const updates = cachedMetrics.map(
+      ({ target, initialTop, height, depth }) => {
+        const currentTop = initialTop - scrollY;
+        const progressValue =
+          (currentTop + height / 2 - viewportHeight / 2) / viewportHeight;
+        const scaledDepth = depth * intensity;
+        const offset = Math.max(
+          -Math.abs(scaledDepth),
+          Math.min(Math.abs(scaledDepth), progressValue * -scaledDepth),
+        );
+        return { target, offset };
+      },
+    );
 
     // Batch writes
     updates.forEach(({ target, offset }) => {
@@ -833,9 +869,17 @@ function setupParallax() {
     }
   };
 
+  cacheMetrics();
   updateParallax();
   window.addEventListener("scroll", requestParallax, { passive: true });
-  window.addEventListener("resize", requestParallax);
+  window.addEventListener(
+    "resize",
+    () => {
+      cacheMetrics();
+      requestParallax();
+    },
+    { passive: true },
+  );
 }
 
 function emitSpatialClick(event) {
